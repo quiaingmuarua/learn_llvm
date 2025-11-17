@@ -2,16 +2,27 @@ cmake_minimum_required(VERSION 3.13)
 
 project(learn_pass LANGUAGES CXX)
 
-file(GLOB PASS_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# 1. HelloPass 库
+add_library(hello_pass_lib
+        src/HelloPass.cpp
+)
 
-foreach(sourcefile ${PASS_SOURCES})
-    get_filename_component(exename ${sourcefile} NAME_WE)
+target_link_libraries(hello_pass_lib
+        PUBLIC llvm_common           # 复用顶层的 LLVM 封装
+)
 
-    add_executable(${exename} ${sourcefile})
+target_include_directories(hello_pass_lib
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-    target_link_libraries(${exename} PRIVATE llvm_common)
-endforeach()
+# 2. CLI 工具：pass_hello
+add_executable(pass_hello
+        src/pass_hello_main.cpp
+)
 
+target_link_libraries(pass_hello
+        PRIVATE hello_pass_lib
+)
 
 
 # ----------------- Tests -----------------

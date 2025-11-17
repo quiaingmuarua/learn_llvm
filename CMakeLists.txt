@@ -52,3 +52,19 @@ endif()
 add_subdirectory(learn-demo)
 add_subdirectory(learn-lang)
 add_subdirectory(learn-pass)
+
+
+include(FetchContent)
+
+if (BUILD_TESTING)  # enable_testing() 会设置这个变量
+    FetchContent_Declare(
+            googletest
+            URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+    )
+
+    # 对旧的 MSVC 选项做点兼容，Linux 这行其实没啥影响
+    set(gtest_disable_pthreads OFF CACHE BOOL "" FORCE)
+
+    FetchContent_MakeAvailable(googletest)
+endif()
+
