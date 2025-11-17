@@ -35,4 +35,12 @@ namespace learn_llvm::pass {
 
     void runSimpleObfOnModule(llvm::Module &M);
 
+    // ------------- FlattenCFPass ----------------
+    struct FlattenCFPass : public llvm::PassInfoMixin<FlattenCFPass> {
+        llvm::PreservedAnalyses run(llvm::Function &F,
+                                    llvm::FunctionAnalysisManager &AM);
+    };
+
+    void runFlattenCFOnModule(llvm::Module &M);
+
 } // namespace learn_llvm::pass

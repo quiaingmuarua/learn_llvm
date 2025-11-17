@@ -7,6 +7,7 @@
 | `HelloPass` | 给所有有定义的函数添加 `hello-pass` 属性 | 主要用于验证 Pass pipeline |
 | `JunkPass` | 在函数入口插入两条未使用算术（`junk1`、`junk2`） | 方便肉眼观察插件已生效 |
 | `SimpleObfPass` | 将整数 `add` 替换为调用内部 helper；helper 使用 bitwise 加法循环 + 假分支 + 噪声 | 产生更明显的控制流噪声但保持语义 |
+| `FlattenCFPass` | 将简单函数的 CFG 改写为 `switch` + dispatcher 的平坦结构（控制流平坦化） | 仅对无 PHI、由 `br/ret` 组成的函数生效 |
 
 ## 构建
 

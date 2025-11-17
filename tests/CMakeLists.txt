@@ -44,3 +44,13 @@ target_link_libraries(test_simple_obf_pass PRIVATE
         hello_pass_lib
 )
 gtest_discover_tests(test_simple_obf_pass)
+
+# ------- 测试 5：FlattenCFPass -------
+add_executable(test_flatten_cf_pass
+        test_flatten_cf_pass.cpp
+)
+target_link_libraries(test_flatten_cf_pass PRIVATE
+        GTest::gtest_main
+        hello_pass_lib
+)
+gtest_discover_tests(test_flatten_cf_pass)

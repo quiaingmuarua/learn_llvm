@@ -12,7 +12,7 @@ extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo() {
         "learn-llvm-pass",   // 插件名字
         "0.1",               // 版本
         [](PassBuilder &PB) {
-            // ① 给 opt 用的：文本 pipeline（-passes=hello-pass,junk-pass,simple-obf）
+            // ① 给 opt 用的：文本 pipeline（-passes=hello-pass,junk-pass,simple-obf,flatten-cf）
             PB.registerPipelineParsingCallback(
                 [](StringRef Name,
                    FunctionPassManager &FPM,
@@ -27,6 +27,10 @@ extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo() {
                     }
                     if (Name == "simple-obf") {
                         FPM.addPass(SimpleObfPass{});
+                        return true;
+                    }
+                    if (Name == "flatten-cf") {
+                        FPM.addPass(FlattenCFPass{});
                         return true;
                     }
                     return false;
@@ -44,6 +48,7 @@ extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo() {
                     FPM.addPass(HelloPass{});
                     FPM.addPass(JunkPass{});
                     FPM.addPass(SimpleObfPass{});
+                    FPM.addPass(FlattenCFPass{});
 
                     MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
                 });

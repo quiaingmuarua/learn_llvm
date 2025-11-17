@@ -4,4 +4,5 @@ LangParserTest.ParseSimplePrecedence 4 0.00147177
 JunkPassTest.InsertsJunkInstructionsInEntry 3 0.00228704
 SimpleObfPassTest.SplitsIntegerAddsIntoObfuscatedForm 1 0.0131888
 SimpleObfPassTest.ReplacesAddWithHelperCall 1 0.00537847
+FlattenCFPassTest.FlattensSimpleBranchFunction 1 0.0128116
 ---

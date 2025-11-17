@@ -5,7 +5,10 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/InstrTypes.h>
 #include <llvm/Passes/PassBuilder.h>
+#include <llvm/ADT/DenseMap.h>
 
 #include <algorithm>
 
@@ -239,6 +242,134 @@ void runSimpleObfOnModule(Module &M) {
 
     FunctionPassManager FPM;
     FPM.addPass(SimpleObfPass{});
+
+    ModulePassManager MPM;
+    MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
+
+    MPM.run(M, MAM);
+}
+
+namespace {
+
+bool isFlattenCandidate(Function &F) {
+    if (F.isDeclaration())
+        return false;
+    if (F.size() <= 1)
+        return false;
+
+    for (auto &BB : F) {
+        for (auto &I : BB) {
+            if (isa<PHINode>(I) || I.isEHPad())
+                return false;
+        }
+        Instruction *Term = BB.getTerminator();
+        if (!isa<BranchInst>(Term) && !isa<ReturnInst>(Term))
+            return false;
+    }
+    return true;
+}
+
+} // namespace
+
+PreservedAnalyses FlattenCFPass::run(Function &F, FunctionAnalysisManager &) {
+    if (!isFlattenCandidate(F))
+        return PreservedAnalyses::all();
+
+    SmallVector<BasicBlock *> OriginalBlocks;
+    OriginalBlocks.reserve(F.size());
+    for (auto &BB : F) {
+        OriginalBlocks.push_back(&BB);
+    }
+
+    DenseMap<BasicBlock *, unsigned> BlockIds;
+    for (unsigned I = 0; I < OriginalBlocks.size(); ++I) {
+        BlockIds[OriginalBlocks[I]] = I;
+    }
+
+    LLVMContext &Ctx = F.getContext();
+    IntegerType *IntTy = Type::getInt32Ty(Ctx);
+
+    BasicBlock *OrigEntry = OriginalBlocks.front();
+    BasicBlock *Entry = BasicBlock::Create(Ctx, "fla.entry", &F, OrigEntry);
+    BasicBlock *Dispatch = BasicBlock::Create(Ctx, "fla.dispatch", &F, OrigEntry);
+    BasicBlock *Exit = BasicBlock::Create(Ctx, "fla.exit", &F);
+
+    IRBuilder<> EntryBuilder(Entry);
+    AllocaInst *StateAlloca = EntryBuilder.CreateAlloca(IntTy, nullptr, "fla_state");
+    AllocaInst *RetAlloca = nullptr;
+    if (!F.getReturnType()->isVoidTy()) {
+        RetAlloca = EntryBuilder.CreateAlloca(F.getReturnType(), nullptr, "fla_ret");
+    }
+    EntryBuilder.CreateStore(ConstantInt::get(IntTy, BlockIds[OrigEntry]), StateAlloca);
+    EntryBuilder.CreateBr(Dispatch);
+
+    IRBuilder<> DispatchBuilder(Dispatch);
+    LoadInst *StateVal = DispatchBuilder.CreateLoad(IntTy, StateAlloca, "fla_state_val");
+    SwitchInst *Switch = DispatchBuilder.CreateSwitch(StateVal, Exit, OriginalBlocks.size());
+
+    for (auto *BB : OriginalBlocks) {
+        Switch->addCase(ConstantInt::get(IntTy, BlockIds[BB]), BB);
+    }
+
+    IRBuilder<> ExitBuilder(Exit);
+    if (F.getReturnType()->isVoidTy()) {
+        ExitBuilder.CreateRetVoid();
+    } else {
+        LoadInst *RetVal = ExitBuilder.CreateLoad(F.getReturnType(), RetAlloca, "fla_ret_val");
+        ExitBuilder.CreateRet(RetVal);
+    }
+
+    for (auto *BB : OriginalBlocks) {
+        Instruction *Term = BB->getTerminator();
+        IRBuilder<> Builder(Term);
+
+        if (auto *Ret = dyn_cast<ReturnInst>(Term)) {
+            if (!F.getReturnType()->isVoidTy() && Ret->getReturnValue()) {
+                Builder.CreateStore(Ret->getReturnValue(), RetAlloca);
+            }
+            Builder.CreateBr(Exit);
+            Ret->eraseFromParent();
+            continue;
+        }
+
+        auto *Br = cast<BranchInst>(Term);
+        if (Br->isConditional()) {
+            Value *Cond = Br->getCondition();
+            unsigned TrueId = BlockIds[Br->getSuccessor(0)];
+            unsigned FalseId = BlockIds[Br->getSuccessor(1)];
+            Value *NextState = Builder.CreateSelect(
+                Cond,
+                ConstantInt::get(IntTy, TrueId),
+                ConstantInt::get(IntTy, FalseId),
+                BB->getName() + ".fla_sel");
+            Builder.CreateStore(NextState, StateAlloca);
+        } else {
+            unsigned TargetId = BlockIds[Br->getSuccessor(0)];
+            Builder.CreateStore(ConstantInt::get(IntTy, TargetId), StateAlloca);
+        }
+        Builder.CreateBr(Dispatch);
+        Br->eraseFromParent();
+    }
+
+    return PreservedAnalyses::none();
+}
+
+void runFlattenCFOnModule(Module &M) {
+    PassBuilder PB;
+
+    LoopAnalysisManager LAM;
+    FunctionAnalysisManager FAM;
+    CGSCCAnalysisManager CGAM;
+    ModuleAnalysisManager MAM;
+
+    PB.registerModuleAnalyses(MAM);
+    PB.registerCGSCCAnalyses(CGAM);
+    PB.registerFunctionAnalyses(FAM);
+    PB.registerLoopAnalyses(LAM);
+    PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
+
+    FunctionPassManager FPM;
+    FPM.addPass(FlattenCFPass{});
 
     ModulePassManager MPM;
     MPM.addPass(createModuleToFunctionPassAdaptor(std::move(FPM)));
