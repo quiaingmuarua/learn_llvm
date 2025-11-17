@@ -134,7 +134,7 @@ local.properties
 .classpath
 .c9revisions/
 .factorypath
-
+*.cmake
 # NetBeans
 nbproject/private/
 nbbuild/
@@ -334,3 +334,4 @@ vgcore.*
 core
 core.*
 /cmake-build-release/
+/.cmake/
