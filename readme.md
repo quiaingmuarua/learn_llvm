@@ -186,3 +186,16 @@ learn-pass/src/pass_xxx.cpp
 * 反混淆
 
 ---
+
+# ✅ 持续集成
+
+GitHub Actions（`.github/workflows/ci.yml`）会在 `push` 与 `pull_request` 触发，流程如下：
+
+1. 安装 Ninja、LLVM/Clang 17
+2. 运行 `cmake -S . -B build -DLLVM_DIR=$(llvm-config-17 --cmakedir) -G Ninja`
+3. `cmake --build build`
+4. `ctest --output-on-failure`
+
+本地若想与 CI 对齐，可以直接执行以上命令。
+
+---

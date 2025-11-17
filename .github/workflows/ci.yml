@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    env:
+      LLVM_VERSION: "17"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build llvm-${LLVM_VERSION}-dev clang-${LLVM_VERSION} lld-${LLVM_VERSION}
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build \
+            -DLLVM_DIR=$(llvm-config-${LLVM_VERSION} --cmakedir) \
+            -DCMAKE_C_COMPILER=clang-${LLVM_VERSION} \
+            -DCMAKE_CXX_COMPILER=clang++-${LLVM_VERSION} \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Run tests
+        working-directory: build
+        run: ctest --output-on-failure
+

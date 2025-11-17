@@ -23,10 +23,18 @@ cd /root/open_source/learn_llvm
   -o ./tmp/add_pass.ll
 
 
-  /root/open_source/llvm-build/bin/clang \
-  -O0 \
+/root/open_source/llvm-build/bin/clang \
+  --target=aarch64-linux-gnu \
+  -O1 \
   -fpass-plugin=./lib/liblearn_llvm_pass.so \
-  -S -emit-llvm \
+  -fPIC -shared \
   ./example/test.c \
-  -o ./tmp/add_pass_O0.ll
+  -o ./tmp/libexample_arm64.so
 
+
+/root/open_source/llvm-build/bin/clang \
+  --target=aarch64-linux-gnu \
+  -O1 \
+  -fpass-plugin=./lib/liblearn_llvm_pass.so \
+  ./example/test.c \
+  -o ./tmp/example_arm64
