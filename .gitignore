@@ -336,3 +336,4 @@ core.*
 /cmake-build-release/
 /.cmake/
 _deps/
+Testing/
