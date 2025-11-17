@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.13)
+
+project(learn_lang LANGUAGES CXX)
+
+file(GLOB LANG_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+
+foreach(sourcefile ${LANG_SOURCES})
+    get_filename_component(exename ${sourcefile} NAME_WE)
+
+    add_executable(${exename} ${sourcefile})
+
+    target_link_libraries(${exename} PRIVATE llvm_common)
+endforeach()

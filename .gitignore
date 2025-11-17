@@ -1,0 +1,336 @@
+# ====================
+# 编译输出和构建目录
+# ====================
+
+# CMake 构建目录
+**/cmake-build-*/
+**/build/
+**/Build/
+**/out/
+**/build-gcc/
+**/cmake-build-debug/
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
+Makefile
+
+# C/C++ 编译输出
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lib
+*.a
+*.la
+*.lo
+*.slo
+*.lai
+*.pdb
+*.ilk
+*.map
+*.tlog
+
+# Rust 编译输出
+**/target/
+Cargo.lock
+# 除非这是一个库项目，否则通常包含 Cargo.lock
+# 对于应用程序，保留 Cargo.lock；对于库，忽略它
+
+# Java 编译输出
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# Python 编译输出
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Go 编译输出
+*.test
+*.prof
+vendor/
+
+# ====================
+# IDE 和编辑器文件
+# ====================
+
+# JetBrains IDEs (IntelliJ IDEA, CLion, PyCharm, etc.)
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vspscc
+*.vssscc
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.tmp_proj
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.xcscmblueprint
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.classpath
+.c9revisions/
+.factorypath
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Atom
+.atom/
+
+# ====================
+# 操作系统文件
+# ====================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ====================
+# 版本控制和包管理
+# ====================
+
+# Git
+.git/
+*.orig
+*.rej
+
+# SVN
+.svn/
+
+# Mercurial
+.hg/
+.hgignore
+
+# Bazaar
+.bzr/
+.bzrignore
+
+# CVS
+/CVS/*
+**/CVS/*
+.cvsignore
+*/.cvsignore
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ====================
+# 运行时和临时文件
+# ====================
+
+# 日志文件
+*.log
+logs/
+*.log.*
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 覆盖率报告
+lcov.info
+*.lcov
+.nyc_output
+.coverage
+htmlcov/
+.tox/
+.coverage.*
+.cache
+.pytest_cache/
+
+# 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 配置文件（敏感信息）
+.env
+.env.local
+.env.*.local
+config/local.json
+secrets.json
+
+# 备份文件
+*.bak
+*.backup
+*.old
+*.tmp
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ====================
+# 项目特定文件
+# ====================
+
+# 自定义忽略
+example.txt.txt
+*.autosave
+
+# 测试输出
+test-results/
+test-output/
+
+# 文档生成
+docs/_build/
+site/
+
+# 性能测试
+*.prof
+*.trace
+
+# 调试文件
+*.dSYM/
+*.su
+*.idb
+
+# Valgrind
+*.valgrind
+vgcore.*
+
+# Core dumps
+core
+core.*
+/cmake-build-release/
