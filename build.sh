@@ -16,8 +16,17 @@ cmake --build .
 cd /root/open_source/learn_llvm
 
 /root/open_source/llvm-build/bin/clang \
-  -O0 \
+  -O1 \
   -fpass-plugin=./lib/liblearn_llvm_pass.so \
   -S -emit-llvm \
   ./example/test.c \
   -o ./tmp/add_pass.ll
+
+
+  /root/open_source/llvm-build/bin/clang \
+  -O0 \
+  -fpass-plugin=./lib/liblearn_llvm_pass.so \
+  -S -emit-llvm \
+  ./example/test.c \
+  -o ./tmp/add_pass_O0.ll
+

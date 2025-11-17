@@ -34,3 +34,13 @@ target_link_libraries(test_junk_pass PRIVATE
         hello_pass_lib      # 里面现在也有 JunkPass
 )
 gtest_discover_tests(test_junk_pass)
+
+# ------- 测试 4：SimpleObfPass -------
+add_executable(test_simple_obf_pass
+        test_simple_obf_pass.cpp
+)
+target_link_libraries(test_simple_obf_pass PRIVATE
+        GTest::gtest_main
+        hello_pass_lib
+)
+gtest_discover_tests(test_simple_obf_pass)
