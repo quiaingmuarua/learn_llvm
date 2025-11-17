@@ -37,8 +37,12 @@ add_library(learn_llvm_pass_plugin SHARED
 )
 
 target_include_directories(learn_llvm_pass_plugin
-        PRIVATE ${LEARN_PASS_INCLUDE_DIR}
+        PRIVATE
+        ${LEARN_PASS_INCLUDE_DIR}
+        ${LLVM_INCLUDE_DIRS}
 )
+# 需要 LLVM 的编译宏，但仍避免链接静态库
+target_compile_definitions(learn_llvm_pass_plugin PRIVATE ${LLVM_DEFINITIONS})
 
 # 不要 target_link_libraries(learn_llvm_pass_plugin PRIVATE llvm_common)
 # 让所有 llvm:: 符号去 opt/clanɡ 本体里解析，避免重复加载 LLVM
