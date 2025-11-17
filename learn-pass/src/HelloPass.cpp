@@ -148,6 +148,7 @@ Function *getOrCreateObfAddHelper(Module &M, IntegerType *IntTy) {
     BasicBlock *Entry = BasicBlock::Create(Ctx, "entry", Fn);
     BasicBlock *Loop = BasicBlock::Create(Ctx, "loop", Fn);
     BasicBlock *Bogus = BasicBlock::Create(Ctx, "bogus", Fn);
+    BasicBlock *Real = BasicBlock::Create(Ctx, "real", Fn);
     BasicBlock *Exit = BasicBlock::Create(Ctx, "exit", Fn);
 
     IRBuilder<> Builder(Entry);
@@ -167,7 +168,7 @@ Function *getOrCreateObfAddHelper(Module &M, IntegerType *IntTy) {
     PhiCarry->addIncoming(NextCarry, Loop);
 
     Value *Cond = Builder.CreateICmpEQ(NextCarry, ConstantInt::get(IntTy, 0), "carry_is_zero");
-    Builder.CreateCondBr(Cond, Bogus, Loop);
+    Builder.CreateCondBr(Cond, Real, Loop);
 
     Builder.SetInsertPoint(Bogus);
     ConstantInt *Mask = createNoiseMask(IntTy);
@@ -175,9 +176,12 @@ Function *getOrCreateObfAddHelper(Module &M, IntegerType *IntTy) {
     Value *NoiseFix = Builder.CreateXor(Noise, Mask, "noise_fix");
     Builder.CreateBr(Exit);
 
+    IRBuilder<> RealBuilder(Real);
+    RealBuilder.CreateBr(Exit);
+
     Builder.SetInsertPoint(Exit);
     auto *ResultPhi = Builder.CreatePHI(IntTy, 2, "result_phi");
-    ResultPhi->addIncoming(NextSum, Loop);
+    ResultPhi->addIncoming(NextSum, Real);
     ResultPhi->addIncoming(NoiseFix, Bogus);
     Builder.CreateRet(ResultPhi);
 

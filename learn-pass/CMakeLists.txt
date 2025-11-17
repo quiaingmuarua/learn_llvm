@@ -13,6 +13,9 @@ add_library(hello_pass_objs OBJECT
 target_include_directories(hello_pass_objs
         PUBLIC ${LEARN_PASS_INCLUDE_DIR}
 )
+target_link_libraries(hello_pass_objs
+        PUBLIC llvm_common
+)
 
 # 2. 静态库：给 CLI 工具 / 测试用，正常链接 llvm_common
 add_library(hello_pass_lib STATIC

@@ -1,6 +1,7 @@
-pass_hello_adds_attr 9 0.00122731
-HelloPassTest.AddsAttributeToDefinedFunctions 2 0.00722722
-LangParserTest.ParseSimplePrecedence 2 0.00601314
-JunkPassTest.InsertsJunkInstructionsInEntry 1 0.0130566
+pass_hello_adds_attr 11 0.000574285
+HelloPassTest.AddsAttributeToDefinedFunctions 4 0.00170596
+LangParserTest.ParseSimplePrecedence 4 0.00147177
+JunkPassTest.InsertsJunkInstructionsInEntry 3 0.00228704
 SimpleObfPassTest.SplitsIntegerAddsIntoObfuscatedForm 1 0.0131888
+SimpleObfPassTest.ReplacesAddWithHelperCall 1 0.00537847
 ---

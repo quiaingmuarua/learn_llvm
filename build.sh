@@ -22,7 +22,7 @@ cd /root/open_source/learn_llvm
   ./example/test.c \
   -o ./tmp/add_pass.ll
 
-
+#generate aarch64 version
 /root/open_source/llvm-build/bin/clang \
   --target=aarch64-linux-gnu \
   -O1 \
@@ -31,10 +31,19 @@ cd /root/open_source/learn_llvm
   ./example/test.c \
   -o ./tmp/libexample_arm64.so
 
-
+#generate aarch64 version
 /root/open_source/llvm-build/bin/clang \
   --target=aarch64-linux-gnu \
   -O1 \
   -fpass-plugin=./lib/liblearn_llvm_pass.so \
   ./example/test.c \
   -o ./tmp/example_arm64
+
+
+#generate x86_64 version
+/root/open_source/llvm-build/bin/clang \
+  --target=x86_64-linux-gnu \
+  -O1 \
+  -fpass-plugin=./lib/liblearn_llvm_pass.so \
+  ./example/test.c \
+  -o ./tmp/example_x86_64
