@@ -13,3 +13,6 @@ foreach(sourcefile ${DEMO_SOURCES})
     # 复用顶层的 llvm_common（包含 include/defs/libs）
     target_link_libraries(${exename} PRIVATE llvm_common)
 endforeach()
+
+
+
