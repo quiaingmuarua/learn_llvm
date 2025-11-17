@@ -23,7 +23,7 @@ int main() {
 
 
     // return 42;
-    Value *RetVal = ConstantInt::get(Type::getInt32Ty(Context), 42);
+    Value *RetVal = ConstantInt::get(Type::getInt32Ty(Context), 44);
     Builder.CreateRet(RetVal);
 
     // 输出 IR 到 stdout
