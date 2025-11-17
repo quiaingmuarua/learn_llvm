@@ -52,6 +52,7 @@ endif()
 add_subdirectory(learn-demo)
 add_subdirectory(learn-lang)
 add_subdirectory(learn-pass)
+add_subdirectory(tests)
 
 
 include(FetchContent)

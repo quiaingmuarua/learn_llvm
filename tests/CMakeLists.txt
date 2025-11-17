@@ -21,3 +21,16 @@ target_link_libraries(test_pass_hello PRIVATE
 
 # 让 CTest 自动发现并注册 gtest 用例
 gtest_discover_tests(test_pass_hello)
+
+
+
+
+add_executable(test_lang_parser
+        test_lang_parser.cpp
+)
+target_link_libraries(test_lang_parser PRIVATE
+        GTest::gtest_main
+        lang_core_lib
+)
+
+gtest_discover_tests(test_lang_parser)
