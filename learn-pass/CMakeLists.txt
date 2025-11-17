@@ -2,18 +2,49 @@ cmake_minimum_required(VERSION 3.13)
 
 project(learn_pass LANGUAGES CXX)
 
-# 1. HelloPass 库
-add_library(hello_pass_lib
+# 0. 头文件路径（方便复用）
+set(LEARN_PASS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# 1. OBJECT 库：只包含 Pass 实现的 .o，不链接任何 LLVM 库
+add_library(hello_pass_objs OBJECT
         src/HelloPass.cpp
 )
 
+target_include_directories(hello_pass_objs
+        PUBLIC ${LEARN_PASS_INCLUDE_DIR}
+)
+
+# 2. 静态库：给 CLI 工具 / 测试用，正常链接 llvm_common
+add_library(hello_pass_lib STATIC
+        $<TARGET_OBJECTS:hello_pass_objs>
+)
+
 target_link_libraries(hello_pass_lib
-        PUBLIC llvm_common           # 复用顶层的 LLVM 封装
+        PUBLIC llvm_common
 )
 
 target_include_directories(hello_pass_lib
-        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        PUBLIC ${LEARN_PASS_INCLUDE_DIR}
 )
+
+# 3. 插件 .so：只用我们的 OBJECT 文件，不再链接 llvm_common（也就是不静态地带一整套 LLVM）
+add_library(learn_llvm_pass_plugin SHARED
+        $<TARGET_OBJECTS:hello_pass_objs>
+        src/PassPlugin.cpp
+)
+
+target_include_directories(learn_llvm_pass_plugin
+        PRIVATE ${LEARN_PASS_INCLUDE_DIR}
+)
+
+# 不要 target_link_libraries(learn_llvm_pass_plugin PRIVATE llvm_common)
+# 让所有 llvm:: 符号去 opt/clanɡ 本体里解析，避免重复加载 LLVM
+
+set_target_properties(learn_llvm_pass_plugin PROPERTIES
+        OUTPUT_NAME "learn_llvm_pass"
+)
+
+
 
 # 2. CLI 工具：pass_hello
 add_executable(pass_hello

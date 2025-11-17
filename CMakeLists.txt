@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(learn_llvm LANGUAGES C CXX)
 
+# 所有 target 默认用 -fPIC（生成 .so 时不会再报错）
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
