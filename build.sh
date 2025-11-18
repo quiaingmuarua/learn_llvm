@@ -75,3 +75,15 @@ cmake --build build
   -fPIC -shared \
   ./example/test.c \
   -o ./tmp/Kotoamatsukami_arm64.so
+
+
+
+  ###################################
+
+
+  /root/open_source/llvm-build/bin/opt \
+    -load-pass-plugin ./build/lib/learn_llvm_deobf.so \
+    -passes=de-hello \
+    -S ./tmp/add_pass_O0.ll \
+    -o ./tmp/restored.ll
+
