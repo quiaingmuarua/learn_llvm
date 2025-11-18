@@ -63,6 +63,90 @@ target_link_libraries(pass_hello
 )
 
 
+# 源文件列表
+set(KOTOAMATSUKAMI_SOURCES
+        src/Kotoamatsukami/PassPlugin.cpp
+        src/Kotoamatsukami/pass/AddJunkCodePass.cpp
+        src/Kotoamatsukami/pass/Branch2Call.cpp
+        src/Kotoamatsukami/pass/Branch2Call_32.cpp
+        src/Kotoamatsukami/pass/ForObsPass.cpp
+        src/Kotoamatsukami/pass/Loopen.cpp
+        src/Kotoamatsukami/pass/AntiDebugPass.cpp
+        src/Kotoamatsukami/pass/SplitBasicBlock.cpp
+        src/Kotoamatsukami/pass/IndirectBranch.cpp
+        src/Kotoamatsukami/pass/IndirectCall.cpp
+        src/Kotoamatsukami/pass/BogusControlFlow.cpp
+        src/Kotoamatsukami/pass/Substitution.cpp
+        src/Kotoamatsukami/pass/Flatten.cpp
+        src/Kotoamatsukami/pass/GVEncrypt.cpp
+        src/Kotoamatsukami/utils/utils.cpp
+        src/Kotoamatsukami/utils/config.cpp
+        src/Kotoamatsukami/utils/TaintAnalysis.cpp
+)
+
+if(CMAKE_CROSSCOMPILING)
+    # ARM64交叉编译：创建插件，手动控制链接过程避免依赖冲突
+    message(STATUS "ARM64 cross-compilation: Creating plugin with manual library linking")
+
+    # 不使用HandleLLVMOptions避免额外依赖检查
+    add_library(Kotoamatsukami SHARED ${KOTOAMATSUKAMI_SOURCES})
+
+    # 设置为LLVM插件的标准属性
+    set_target_properties(Kotoamatsukami PROPERTIES
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
+            POSITION_INDEPENDENT_CODE ON
+            # 关键：允许未定义符号，运行时由opt工具解析
+            LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all -Wl,--allow-shlib-undefined"
+    )
+
+    # 添加LLVM编译定义和包含路径
+    target_compile_definitions(Kotoamatsukami PRIVATE ${LLVM_DEFINITIONS})
+    target_include_directories(Kotoamatsukami PRIVATE ${LLVM_INCLUDE_DIRS} ${LEARN_PASS_INCLUDE_DIR})
+
+    # 根据json库类型决定是否链接target (ARM64交叉编译)
+    if(NOT JSON_LOCAL_AVAILABLE)
+        # 检查目标是否存在
+        if(TARGET nlohmann_json::nlohmann_json)
+            target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json::nlohmann_json)
+        elseif(TARGET nlohmann_json)
+            target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json)
+        endif()
+        # 无论目标是否存在，都添加 json 的包含目录（FetchContent 下载的路径）
+        if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+            target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+        endif()
+    endif()
+
+    # ARM64交叉编译时不链接LLVM库，运行时由opt工具提供符号解析
+
+else()
+    # x86_64本机编译：使用标准LLVM插件方法
+    include(AddLLVM)
+    include(HandleLLVMOptions)
+
+    add_llvm_pass_plugin(Kotoamatsukami ${KOTOAMATSUKAMI_SOURCES})
+
+    # 手动添加包含路径（add_llvm_pass_plugin 可能不会自动设置）
+    target_include_directories(Kotoamatsukami PRIVATE ${LEARN_PASS_INCLUDE_DIR})
+
+    # 根据json库类型决定是否链接target (x86_64本地编译)
+    if(NOT JSON_LOCAL_AVAILABLE)
+        # 检查目标是否存在
+        if(TARGET nlohmann_json::nlohmann_json)
+            target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json::nlohmann_json)
+        elseif(TARGET nlohmann_json)
+            target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json)
+        endif()
+        # 无论目标是否存在，都添加 json 的包含目录（FetchContent 下载的路径）
+        if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+            target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+        endif()
+    endif()
+endif()
+
+
+
 # ----------------- Tests -----------------
 # 测试输入 IR 文件
 set(PASS_TEST_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/tests/hello_input.ll")

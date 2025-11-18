@@ -72,3 +72,18 @@ if (BUILD_TESTING)  # enable_testing() 会设置这个变量
     FetchContent_MakeAvailable(googletest)
 endif()
 
+
+# 引入json处理库
+# 添加 nlohmann/json 作为子模块
+include(FetchContent)
+
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.3
+        GIT_SHALLOW TRUE
+)
+
+FetchContent_MakeAvailable(json)
+
+
