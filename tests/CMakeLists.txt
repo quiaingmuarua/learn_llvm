@@ -55,12 +55,5 @@ target_link_libraries(test_flatten_cf_pass PRIVATE
 )
 gtest_discover_tests(test_flatten_cf_pass)
 
-# ------- 测试 6：Kotoamatsukami Loopen -------
-add_executable(test_koto_loopen
-        test_koto_loopen.cpp
-)
-target_link_libraries(test_koto_loopen PRIVATE
-        GTest::gtest_main
-        kotoamatsukami_static
-)
-gtest_discover_tests(test_koto_loopen)
+# ------- Kotoamatsukami Tests -------
+add_subdirectory(koto)

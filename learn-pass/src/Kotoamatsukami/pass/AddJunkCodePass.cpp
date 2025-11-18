@@ -14,6 +14,7 @@
 #include "llvm/IR/InlineAsm.h"
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include <cstdlib> // rand()
 using namespace llvm;
@@ -72,7 +73,12 @@ PreservedAnalyses AddJunkCodePass::run(Module &M, ModuleAnalysisManager &AM)
 {
     bool isChanged = false;
     int flowerIndex = 0;
+    int probabilityConfig = junkCode.op1;
     double addJunkCodeProbability = 0.2;
+    if (probabilityConfig > 0) {
+        int clamped = std::clamp(probabilityConfig, 0, 100);
+        addJunkCodeProbability = static_cast<double>(clamped) / 100.0;
+    }
     srand(time(nullptr));
     readConfig("/home/zzzccc/cxzz/Kotoamatsukami/config/config.json");
     if (junkCode.model)

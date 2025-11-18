@@ -104,6 +104,10 @@ int parseConfig(const std::string& filename) {
             settings.module_name = tmp;
         }
         // Loopen settings end
+        if (j.contains("probability"))
+        {
+            settings.op1 = j["probability"];
+        }
     };
 
     parseFunctionSettings(config["loopen"], loopen);
