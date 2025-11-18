@@ -12,13 +12,16 @@ add_library(hello_pass_objs OBJECT
 
 target_include_directories(hello_pass_objs
         PUBLIC ${LEARN_PASS_INCLUDE_DIR}
+        # 只添加 LLVM 头文件和编译定义，不链接库（避免依赖传播）
+        PRIVATE ${LLVM_INCLUDE_DIRS}
 )
-target_link_libraries(hello_pass_objs
-        PUBLIC llvm_common
+target_compile_definitions(hello_pass_objs
+        PRIVATE ${LLVM_DEFINITIONS}
 )
+# 不链接 llvm_common，避免依赖传播到使用此 OBJECT 库的目标
 
 # 2. 静态库：给 CLI 工具 / 测试用，正常链接 llvm_common
-add_library(hello_pass_lib STATIC
+add_library(hello_pass_lib SHARED
         $<TARGET_OBJECTS:hello_pass_objs>
 )
 
@@ -31,25 +34,48 @@ target_include_directories(hello_pass_lib
 )
 
 # 3. 插件 .so：只用我们的 OBJECT 文件，不再链接 llvm_common（也就是不静态地带一整套 LLVM）
-add_library(learn_llvm_pass_plugin SHARED
-        $<TARGET_OBJECTS:hello_pass_objs>
-        src/hello/PassPlugin.cpp
-)
-
-target_include_directories(learn_llvm_pass_plugin
-        PRIVATE
-        ${LEARN_PASS_INCLUDE_DIR}
-        ${LLVM_INCLUDE_DIRS}
-)
-# 需要 LLVM 的编译宏，但仍避免链接静态库
-target_compile_definitions(learn_llvm_pass_plugin PRIVATE ${LLVM_DEFINITIONS})
-
-# 不要 target_link_libraries(learn_llvm_pass_plugin PRIVATE llvm_common)
-# 让所有 llvm:: 符号去 opt/clanɡ 本体里解析，避免重复加载 LLVM
-
-set_target_properties(learn_llvm_pass_plugin PROPERTIES
-        OUTPUT_NAME "learn_llvm_pass"
-)
+# 关键：由于 Kotoamatsukami 的 HandleLLVMOptions 会设置全局 CMAKE_SHARED_LINKER_FLAGS（包含 -z,defs），
+# 而 add_llvm_pass_plugin 会自动处理这个问题（Kotoamatsukami 成功编译证明了这一点）
+# 解决方案：使用 add_llvm_pass_plugin 而不是 add_library，让它自动处理 -z,defs 问题
+# 注意：add_llvm_pass_plugin 需要源文件列表，不能直接使用 OBJECT 库
+# 所以我们直接使用源文件，而不是 OBJECT 库
+if(NOT CMAKE_CROSSCOMPILING)
+    # x86_64 本机编译：使用 add_llvm_pass_plugin 自动处理链接标志
+    include(AddLLVM)
+    include(HandleLLVMOptions)
+    
+    add_llvm_pass_plugin(learn_llvm_pass_plugin
+            src/hello/HelloPass.cpp
+            src/hello/PassPlugin.cpp
+    )
+    
+    # 手动添加包含路径（add_llvm_pass_plugin 可能不会自动设置）
+    target_include_directories(learn_llvm_pass_plugin PRIVATE ${LEARN_PASS_INCLUDE_DIR})
+    
+    # 设置输出名称
+    set_target_properties(learn_llvm_pass_plugin PROPERTIES
+            OUTPUT_NAME "learn_llvm_pass"
+    )
+else()
+    # ARM64 交叉编译：使用与 Kotoamatsukami 相同的方法
+    add_library(learn_llvm_pass_plugin SHARED
+            src/hello/HelloPass.cpp
+            src/hello/PassPlugin.cpp
+    )
+    
+    target_include_directories(learn_llvm_pass_plugin
+            PRIVATE
+            ${LEARN_PASS_INCLUDE_DIR}
+            ${LLVM_INCLUDE_DIRS}
+    )
+    target_compile_definitions(learn_llvm_pass_plugin PRIVATE ${LLVM_DEFINITIONS})
+    
+    set_target_properties(learn_llvm_pass_plugin PROPERTIES
+            OUTPUT_NAME "learn_llvm_pass"
+            POSITION_INDEPENDENT_CODE ON
+            LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all -Wl,--allow-shlib-undefined"
+    )
+endif()
 
 
 
