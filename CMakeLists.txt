@@ -51,13 +51,6 @@ if (DEFINED LLVM_ENABLE_EH AND NOT LLVM_ENABLE_EH)
 endif()
 
 
-add_subdirectory(learn-demo)
-add_subdirectory(learn-lang)
-add_subdirectory(learn-pass)
-add_subdirectory(tests)
-add_subdirectory(learn-deobf)
-
-
 include(FetchContent)
 
 if (BUILD_TESTING)  # enable_testing() 会设置这个变量
@@ -72,11 +65,8 @@ if (BUILD_TESTING)  # enable_testing() 会设置这个变量
     FetchContent_MakeAvailable(googletest)
 endif()
 
-
 # 引入json处理库
 # 添加 nlohmann/json 作为子模块
-include(FetchContent)
-
 FetchContent_Declare(
         json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -85,5 +75,12 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(json)
+
+
+add_subdirectory(learn-demo)
+add_subdirectory(learn-lang)
+add_subdirectory(learn-pass)
+add_subdirectory(tests)
+add_subdirectory(learn-deobf)
 
 
