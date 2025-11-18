@@ -143,10 +143,12 @@ if(CMAKE_CROSSCOMPILING)
         elseif(TARGET nlohmann_json)
             target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json)
         endif()
-        # 无论目标是否存在，都添加 json 的包含目录（FetchContent 下载的路径）
-        if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
-            target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
-        endif()
+    elseif(TARGET nlohmann_json::nlohmann_json)
+        target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json::nlohmann_json)
+    endif()
+    # 无论 JSON 来源如何，都尝试添加 FetchContent 下载的包含目录，避免 CI 环境缺少系统头文件
+    if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+        target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
     endif()
 
     # ARM64交叉编译时不链接LLVM库，运行时由opt工具提供符号解析
@@ -174,10 +176,12 @@ else()
         elseif(TARGET nlohmann_json)
             target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json)
         endif()
-        # 无论目标是否存在，都添加 json 的包含目录（FetchContent 下载的路径）
-        if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
-            target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
-        endif()
+    elseif(TARGET nlohmann_json::nlohmann_json)
+        target_link_libraries(Kotoamatsukami PRIVATE nlohmann_json::nlohmann_json)
+    endif()
+    # 无论目标是否存在，都添加 json 的包含目录（FetchContent 下载的路径）
+    if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+        target_include_directories(Kotoamatsukami PRIVATE ${CMAKE_BINARY_DIR}/_deps/json-src/include)
     endif()
 endif()
 
