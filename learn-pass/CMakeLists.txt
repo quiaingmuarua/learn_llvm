@@ -158,8 +158,13 @@ else()
 
     add_llvm_pass_plugin(Kotoamatsukami ${KOTOAMATSUKAMI_SOURCES})
 
-    # 手动添加包含路径（add_llvm_pass_plugin 可能不会自动设置）
-    target_include_directories(Kotoamatsukami PRIVATE ${LEARN_PASS_INCLUDE_DIR})
+    # 手动添加包含路径（add_llvm_pass_plugin 可能不会自动设置，特别是在 CI 环境中）
+    target_include_directories(Kotoamatsukami PRIVATE 
+            ${LEARN_PASS_INCLUDE_DIR}
+            ${LLVM_INCLUDE_DIRS}
+    )
+    # 添加 LLVM 编译定义（确保与 LLVM 配置一致）
+    target_compile_definitions(Kotoamatsukami PRIVATE ${LLVM_DEFINITIONS})
 
     # 根据json库类型决定是否链接target (x86_64本地编译)
     if(NOT JSON_LOCAL_AVAILABLE)
