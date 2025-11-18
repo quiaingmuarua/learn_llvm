@@ -7,7 +7,7 @@ set(LEARN_PASS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # 1. OBJECT 库：只包含 Pass 实现的 .o，不链接任何 LLVM 库
 add_library(hello_pass_objs OBJECT
-        src/HelloPass.cpp
+        src/hello/HelloPass.cpp
 )
 
 target_include_directories(hello_pass_objs
@@ -33,7 +33,7 @@ target_include_directories(hello_pass_lib
 # 3. 插件 .so：只用我们的 OBJECT 文件，不再链接 llvm_common（也就是不静态地带一整套 LLVM）
 add_library(learn_llvm_pass_plugin SHARED
         $<TARGET_OBJECTS:hello_pass_objs>
-        src/PassPlugin.cpp
+        src/hello/PassPlugin.cpp
 )
 
 target_include_directories(learn_llvm_pass_plugin
@@ -55,7 +55,7 @@ set_target_properties(learn_llvm_pass_plugin PROPERTIES
 
 # 2. CLI 工具：pass_hello
 add_executable(pass_hello
-        src/pass_hello_main.cpp
+        src/hello/pass_hello_main.cpp
 )
 
 target_link_libraries(pass_hello

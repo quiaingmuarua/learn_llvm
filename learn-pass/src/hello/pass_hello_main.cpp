@@ -1,4 +1,4 @@
-#include "learn_llvm/pass/HelloPass.h"
+#include "learn_llvm/hello/HelloPass.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Verifier.h>

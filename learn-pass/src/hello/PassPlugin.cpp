@@ -1,4 +1,4 @@
-#include "learn_llvm/pass/HelloPass.h"
+#include "learn_llvm/hello/HelloPass.h"
 
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/PassPlugin.h>
