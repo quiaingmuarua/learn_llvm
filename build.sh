@@ -53,8 +53,7 @@ cmake --build build
   -fpass-plugin=./build/lib/Kotoamatsukami.so \
   -S -emit-llvm \
   ./example/test.c \
-  -o ./tmp/Kotoamatsukami.ll
-
+  -o ./tmp/Kotoamatsukami_after.ll
 
 
 

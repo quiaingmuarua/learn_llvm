@@ -185,6 +185,27 @@ else()
     endif()
 endif()
 
+# 额外的静态库（供测试等直接链接）
+add_library(kotoamatsukami_static STATIC ${KOTOAMATSUKAMI_SOURCES})
+target_include_directories(kotoamatsukami_static
+        PUBLIC
+        ${LEARN_PASS_INCLUDE_DIR}
+        ${LLVM_INCLUDE_DIRS}
+)
+target_compile_definitions(kotoamatsukami_static PUBLIC ${LLVM_DEFINITIONS})
+target_link_libraries(kotoamatsukami_static PUBLIC llvm_common)
+if(NOT JSON_LOCAL_AVAILABLE)
+        if(TARGET nlohmann_json::nlohmann_json)
+                target_link_libraries(kotoamatsukami_static PUBLIC nlohmann_json::nlohmann_json)
+        elseif(TARGET nlohmann_json)
+                target_link_libraries(kotoamatsukami_static PUBLIC nlohmann_json)
+        endif()
+elseif(TARGET nlohmann_json::nlohmann_json)
+        target_link_libraries(kotoamatsukami_static PUBLIC nlohmann_json::nlohmann_json)
+endif()
+if(EXISTS ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+        target_include_directories(kotoamatsukami_static PUBLIC ${CMAKE_BINARY_DIR}/_deps/json-src/include)
+endif()
 
 
 # ----------------- Tests -----------------
