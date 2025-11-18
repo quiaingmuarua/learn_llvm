@@ -44,8 +44,10 @@
 *.app
 *.o
 *.obj
-*.so
-*.so.*
+*.i64
+*.id*
+*.nam
+*.til
 *.dylib
 *.dll
 *.lib
@@ -86,7 +88,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
