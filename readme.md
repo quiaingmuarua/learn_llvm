@@ -78,12 +78,13 @@ learn_llvm/
 * Hello Pass
 * 遍历函数/基本块/指令
 * 修改 IR
-* 常见 OLLVM 混淆 pass：
+* 常见 OLLVM 混淆 pass（集中在 `learn-pass/src/Kotoamatsukami`）：
 
     * 控制流平坦化（CFF）
     * 虚假控制流（Bogus Control Flow）
     * 指令替换（Instruction Substitution）
     * 字符串/常量混淆
+    * 其它辅助 Pass：`ForObs`、`SplitBasicBlock`、`AddJunkCode`、`AntiDebug`、`GVEncrypt`、`Loopen` 等
 
 未来可加入：
 
@@ -120,6 +121,9 @@ learn_llvm/build/bin/
 bin/demo_hello_ir
 bin/lang_repl
 bin/pass_hello
+bin/test_pass_hello
+bin/test_koto_loopen
+bin/test_koto_passes
 ```
 
 ---
@@ -153,6 +157,30 @@ learn-pass/src/pass_xxx.cpp
 ```
 
 以后加入插件式 Pass 时，我也可以帮你扩展支持 `-fpass-plugin=xxx.so` 的结构。
+
+---
+
+# 🧪 测试说明
+
+项目中已经集成了一批 GoogleTest 用例如下：
+
+| 可执行文件 | 说明 |
+|------------|------|
+| `bin/test_pass_hello` | 覆盖 `hello_pass_lib` 中 Hello/Junk/SimpleObf/Flatten Pass 的基础行为 |
+| `bin/test_koto_loopen` | 验证 `Kotoamatsukami::Loopen` Pass 是否会注入 `Kotoamatsukami_quick_pow` 助手函数 |
+| `bin/test_koto_passes` | 批量测试 `ForObs`、`BogusControlFlow`、`SplitBasicBlock`、`AddJunkCode` 等混淆 Pass |
+
+运行方式：
+
+```bash
+# 构建后直接运行某个测试
+./build/bin/test_koto_passes
+
+# 只运行 Loopen 测试
+./build/bin/test_koto_loopen --gtest_filter='*Loopen*'
+```
+
+这些测试会在运行时为 `Kotoamatsukami` 生成临时配置文件（位于 `/tmp/koto_test_config_*.json`），互不干扰。实际使用插件时，可手动编辑仓库根目录的 `Kotoamatsukami.config` 来启用/禁用指定的混淆 Pass。
 
 ---
 
@@ -196,6 +224,6 @@ GitHub Actions（`.github/workflows/ci.yml`）会在 `push` 与 `pull_request` �
 3. `cmake --build build`
 4. `ctest --output-on-failure`
 
-本地若想与 CI 对齐，可以直接执行以上命令。
+本地若想与 CI 对齐，可以直接执行以上命令。混淆相关的 gtest（`test_koto_*`）目前需要单独运行，上文“测试说明”部分给出了示例。
 
 ---
