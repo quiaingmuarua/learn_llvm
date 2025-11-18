@@ -4,9 +4,9 @@ project(learn_lang LANGUAGES CXX)
 
 # 1. 核心库：Lexer + Parser + AST
 add_library(lang_core_lib
-        src/AST.cpp
-        src/Lexer.cpp
-        src/Parser.cpp
+        src/repl/AST.cpp
+        src/repl/Lexer.cpp
+        src/repl/Parser.cpp
 )
 
 target_include_directories(lang_core_lib
@@ -19,7 +19,7 @@ target_include_directories(lang_core_lib
 
 # 2. REPL 工具
 add_executable(lang_repl
-        src/lang_repl_main.cpp
+        src/repl/lang_repl_main.cpp
 )
 
 target_link_libraries(lang_repl

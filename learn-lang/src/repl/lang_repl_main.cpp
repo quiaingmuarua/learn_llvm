@@ -1,6 +1,6 @@
-#include "learn_llvm/lang/Lexer.h"
-#include "learn_llvm/lang/Parser.h"
-#include "learn_llvm/lang/AST.h"
+#include "learn_llvm/lang/repl/Lexer.h"
+#include "learn_llvm/lang/repl/Parser.h"
+#include "learn_llvm/lang/repl/AST.h"
 
 #include <iostream>
 #include <memory>

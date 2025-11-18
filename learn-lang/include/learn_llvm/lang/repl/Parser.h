@@ -1,7 +1,7 @@
 #pragma once
 
-#include "learn_llvm/lang/AST.h"
-#include "learn_llvm/lang/Lexer.h"
+#include "learn_llvm/lang/repl/AST.h"
+#include "learn_llvm/lang/repl/Lexer.h"
 
 namespace learn_llvm::lang {
 

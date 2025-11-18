@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../learn-pass/include/learn_llvm/hello/HelloPass.h"
+#include "learn_llvm/hello/HelloPass.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
