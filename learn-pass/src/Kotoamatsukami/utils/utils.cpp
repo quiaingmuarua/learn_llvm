@@ -68,6 +68,7 @@ Function* createFuncFromGenerated(Module* M, std::string funcName, std::string m
 Function* createFuncFromString(Module* M, std::string funcName, std::string irString)
 {
     LLVMContext& Context = M->getContext();
+    Context.setDiscardValueNames(false);
     
     // 创建MemoryBuffer从字符串输入
     std::unique_ptr<MemoryBuffer> buffer = MemoryBuffer::getMemBuffer(irString, "IRFromString");

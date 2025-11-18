@@ -339,6 +339,11 @@ PreservedAnalyses Branch2Call_32::run(llvm::Module& M,
     //       Data.getTypeAllocSize(Type::getInt8Ty(F.getContext())->getPointerTo());
     //   Type *PtrValueType = Type::getIntNTy(F.getContext(), PtrSize * 8);
     readConfig("/home/zzzccc/cxzz/Kotoamatsukami/config/config.json");
+    if (targetArch != Arch::X86) {
+        PrintWarning("Branch2Call_32 is only supported on x86 (32-bit) targets. Current target: ",
+                     archToString(targetArch));
+        return PreservedAnalyses::all();
+    }
     if (branch2call_32.model) {
         for (llvm::Function& F : M) {
             if (getBasicBlockCountIfNotSkipped(F) != -1) {

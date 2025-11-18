@@ -344,6 +344,11 @@ PreservedAnalyses Branch2Call::run(llvm::Module& M,
 {
     LLVMContext& Ctx = M.getContext();
     readConfig("/home/zzzccc/cxzz/Kotoamatsukami/config/config.json");
+    if (targetArch != Arch::X86_64) {
+        PrintWarning("Branch2Call is only supported on x86_64 targets. Current target: ",
+                     archToString(targetArch));
+        return PreservedAnalyses::all();
+    }
     if (branch2call.model) {
         for (llvm::Function& F : M) {
             if (getBasicBlockCountIfNotSkipped(F) != -1) {

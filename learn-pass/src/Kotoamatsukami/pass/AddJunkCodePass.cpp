@@ -20,12 +20,12 @@ using namespace llvm;
 
 // todo https://zhuanlan.zhihu.com/p/640711859
 std::vector<std::string> arm64AsmCode = {
-    "udf #0x5397FB1\n"
+    "udf #0x5397\n"
     ".long 87654321\n"
     ".long 12345678\n",
 
     "b #0x10\n"
-    "udf #0x5397FB1\n"
+    "udf #0x5397\n"
     ".long 87654321\n"
     ".long 12345678\n"
 };
