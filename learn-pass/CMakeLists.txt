@@ -50,7 +50,12 @@ if(NOT CMAKE_CROSSCOMPILING)
     )
     
     # 手动添加包含路径（add_llvm_pass_plugin 可能不会自动设置）
-    target_include_directories(learn_llvm_pass_plugin PRIVATE ${LEARN_PASS_INCLUDE_DIR})
+    target_include_directories(learn_llvm_pass_plugin PRIVATE 
+            ${LEARN_PASS_INCLUDE_DIR}
+            ${LLVM_INCLUDE_DIRS}
+    )
+    # 添加 LLVM 编译定义（确保与 LLVM 配置一致）
+    target_compile_definitions(learn_llvm_pass_plugin PRIVATE ${LLVM_DEFINITIONS})
     
     # 设置输出名称
     set_target_properties(learn_llvm_pass_plugin PROPERTIES
