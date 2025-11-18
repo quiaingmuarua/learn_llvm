@@ -55,6 +55,7 @@ add_subdirectory(learn-demo)
 add_subdirectory(learn-lang)
 add_subdirectory(learn-pass)
 add_subdirectory(tests)
+add_subdirectory(learn-deobf)
 
 
 include(FetchContent)
