@@ -363,3 +363,4 @@ core.*
 _deps/
 /Testing/Temporary/
 
+!/python_script/lib/libgeiri.so.nam
