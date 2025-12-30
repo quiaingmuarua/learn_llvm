@@ -15,4 +15,10 @@ foreach(sourcefile ${DEMO_SOURCES})
 endforeach()
 
 
+add_subdirectory(llvm_practice/01-llvm-hellowold)
+add_subdirectory(llvm_practice/02-expr-compiler)
+add_subdirectory(llvm_practice/03-variable)
+add_subdirectory(llvm_practice/04-errhandle_unittest)
+
+
 

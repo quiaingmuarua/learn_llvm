@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.18)
+project(llvm_test)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 17)
+
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+
+find_package(LLVM REQUIRED CONFIG)
+
+list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
+
+include(AddLLVM)
+
+include_directories("${LLVM_BINARY_DIR}/include" "${LLVM_INCLUDE_DIR}")
+add_definitions(${LLVM_DEFINITIONS})
+
+if (NOT ${LLVM_ENABLE_RTTI})
+    # For non-MSVC compilers
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+endif()
+
+set(LLVM_LINK_COMPONENTS Support Core)
+
+
+# 取当前目录名（例如：01-llvm-helloworld）
+get_filename_component(TARGET_NAME "${CMAKE_CURRENT_SOURCE_DIR}" NAME)
+
+# 让 target 名更“干净”：替换非法字符
+string(REPLACE "-" "_" TARGET_NAME "${TARGET_NAME}")
+
+add_llvm_executable(${TARGET_NAME} main.cc)
