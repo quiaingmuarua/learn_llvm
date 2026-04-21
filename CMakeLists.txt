@@ -38,11 +38,17 @@ include(TableGen)
 include(HandleLLVMOptions)
 
 # Locate llvm-tblgen for TableGen.cmake
-get_filename_component(LLVM_INSTALL_PREFIX "${LLVM_DIR}/../.." ABSOLUTE)
+if (DEFINED LLVM_TOOLS_BINARY_DIR AND EXISTS "${LLVM_TOOLS_BINARY_DIR}")
+    set(LLVM_TOOL_BIN_DIR "${LLVM_TOOLS_BINARY_DIR}")
+else()
+    # LLVM_DIR usually points at <prefix>/lib/cmake/llvm, so walk back to <prefix>.
+    get_filename_component(LLVM_INSTALL_PREFIX "${LLVM_DIR}/../../.." ABSOLUTE)
+    set(LLVM_TOOL_BIN_DIR "${LLVM_INSTALL_PREFIX}/bin")
+endif()
 
 find_program(LLVM_TABLEGEN_EXE
-        NAMES llvm-tblgen llvm-tblgen-17
-        HINTS "${LLVM_INSTALL_PREFIX}/bin" "/usr/local/bin" "/usr/bin"
+        NAMES llvm-tblgen llvm-tblgen-${LLVM_VERSION_MAJOR} llvm-tblgen-17
+        HINTS "${LLVM_TOOL_BIN_DIR}" "/usr/local/bin" "/usr/bin"
 )
 
 if (NOT LLVM_TABLEGEN_EXE)

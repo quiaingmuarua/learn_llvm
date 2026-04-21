@@ -1,7 +1,11 @@
 #include "learn_llvm/de_hello/DeHelloPass.h"
 
 #include <llvm/Passes/PassBuilder.h>
+#if __has_include(<llvm/Plugins/PassPlugin.h>)
+#include <llvm/Plugins/PassPlugin.h>
+#else
 #include <llvm/Passes/PassPlugin.h>
+#endif
 
 using namespace llvm;
 using namespace learn_llvm::deobf;
@@ -32,4 +36,3 @@ extern "C" LLVM_ATTRIBUTE_WEAK PassPluginLibraryInfo llvmGetPassPluginInfo() {
                 });
         }};
 }
-

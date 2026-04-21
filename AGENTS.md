@@ -1,4 +1,4 @@
-# CLAUDE.md — Agent Guide for `learn_llvm`
+# AGENTS.md — Agent Guide for `learn_llvm`
 
 > **Start here.** This file is the authoritative reference for any AI agent
 > working in this repository. Read it fully before making changes.
@@ -17,7 +17,7 @@ obfuscation plugin → deobfuscation analysis.
 
 ```
 learn_llvm/
-├── CLAUDE.md                          ← you are here (agent entry point)
+├── AGENTS.md                          ← you are here (agent entry point)
 ├── CMakeLists.txt                     ← top-level CMake (ties all modules)
 ├── Kotoamatsukami.config              ← JSON: enable/disable obfuscation passes
 ├── Kotoamatsukami.config.schema.json  ← JSON Schema for the above

@@ -19,5 +19,10 @@ target_link_libraries(
   ${llvm_all}
 )
 
+target_compile_definitions(
+  lexer_test
+  PRIVATE LEXER_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../../testset"
+)
+
 include(GoogleTest)
 gtest_discover_tests(lexer_test)

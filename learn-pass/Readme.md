@@ -18,15 +18,20 @@ cmake --build .
 
 生成内容：
 
-- `lib/liblearn_llvm_pass.so`：提供给 `opt` 或 `clang -fpass-plugin` 动态加载。
-- `lib/libhello_pass_lib.a`：静态库，供测试或 `bin/pass_hello` 使用。
+- `build/lib/learn_llvm_pass.{so,dylib}`：提供给 `opt` 或 `clang -fpass-plugin` 动态加载。
+- `build/lib/libhello_pass_lib.{so,dylib}`：共享库，供测试或 `bin/pass_hello` 使用。
 
 ## 快速体验
 
 ### 使用 `opt`
 ```bash
+PLUGIN_EXT=so   # macOS: dylib
+```
+
+### 使用 `opt`
+```bash
 /root/open_source/llvm-build/bin/opt \
-  -load-pass-plugin ./lib/liblearn_llvm_pass.so \
+  -load-pass-plugin ./build/lib/learn_llvm_pass.${PLUGIN_EXT} \
   -passes=hello-pass,junk-pass,simple-obf \
   -S ./learn-pass/tests/hello_input.ll \
   -o ./tmp/out_obf.ll
@@ -37,7 +42,7 @@ cmake --build .
 /root/open_source/llvm-build/bin/clang \
   --target=aarch64-linux-gnu \
   -O1 \
-  -fpass-plugin=./lib/liblearn_llvm_pass.so \
+  -fpass-plugin=./build/lib/learn_llvm_pass.${PLUGIN_EXT} \
   -fPIC -shared \
   ./example/test.c \
   -o ./tmp/libexample_arm64.so

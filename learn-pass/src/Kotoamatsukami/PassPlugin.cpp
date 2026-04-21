@@ -1,4 +1,8 @@
-#include "llvm/Passes/PassPlugin.h"
+#if __has_include(<llvm/Plugins/PassPlugin.h>)
+#include <llvm/Plugins/PassPlugin.h>
+#else
+#include <llvm/Passes/PassPlugin.h>
+#endif
 #include "llvm/Passes/PassBuilder.h"
 #include "learn_llvm/Kotoamatsukami/AntiDebugPass.h"
 #include "learn_llvm/Kotoamatsukami/BogusControlFlow.h"

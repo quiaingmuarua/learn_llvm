@@ -2,6 +2,7 @@
 #include "llvm/ADT/StringMap.h"
 #include "type.h"
 #include <memory>
+#include <vector>
 
 enum class SymbolKind {
     LocalVariable

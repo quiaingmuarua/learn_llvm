@@ -7,7 +7,11 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Pass.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
-#include "llvm/Passes/PassPlugin.h"
+#if __has_include(<llvm/Plugins/PassPlugin.h>)
+#include <llvm/Plugins/PassPlugin.h>
+#else
+#include <llvm/Passes/PassPlugin.h>
+#endif
 #include "llvm/Passes/PassBuilder.h"
 #include <map>
 #include <set>

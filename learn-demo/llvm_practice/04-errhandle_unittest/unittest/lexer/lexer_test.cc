@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <memory>
+#include <string>
 #include "lexer.h"
 
 
@@ -6,24 +8,25 @@ class LexerTest : public ::testing::Test
 {
 public:
     void SetUp() override {
-        static llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> buf = llvm::MemoryBuffer::getFile("../testset/lexer_01.txt");
+        auto path = std::string(LEXER_TEST_DATA_DIR) + "/lexer_01.txt";
+        auto buf = llvm::MemoryBuffer::getFile(path);
         if (!buf) {
-            llvm::errs() << "can't open file!!!\n";
+            llvm::errs() << "can't open file: " << path << "\n";
             return;
         }
 
-        llvm::SourceMgr mgr;
-        DiagEngine diagEngine(mgr);
+        mgr = std::make_unique<llvm::SourceMgr>();
+        diagEngine = std::make_unique<DiagEngine>(*mgr);
 
-        mgr.AddNewSourceBuffer(std::move(*buf), llvm::SMLoc());
+        mgr->AddNewSourceBuffer(std::move(*buf), llvm::SMLoc());
 
-        lexer = new Lexer(mgr, diagEngine);
+        lexer = std::make_unique<Lexer>(*mgr, *diagEngine);
     }
 
-    void TearDown() override {
-        delete lexer;
-    }
-    Lexer *lexer;
+protected:
+    std::unique_ptr<llvm::SourceMgr> mgr;
+    std::unique_ptr<DiagEngine> diagEngine;
+    std::unique_ptr<Lexer> lexer;
 };
 
 /*
@@ -32,6 +35,8 @@ aa=1 ;
 */
 
 TEST_F(LexerTest, NextToken) {
+    ASSERT_NE(lexer, nullptr);
+
     /// 正确集
     /// 当前集
     std::vector<Token> expectedVec, curVec;

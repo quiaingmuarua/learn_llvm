@@ -20,7 +20,7 @@ learn-deobf/
 │       └── DeHelloPass.h
 ├── src/de_hello/
 │   ├── DeHelloPass.cpp       ← deobfuscation logic
-│   ├── PassPlugin.cpp        ← plugin entry for learn_llvm_deobf.so
+│   ├── PassPlugin.cpp        ← plugin entry for learn_llvm_deobf shared module
 │   └── pass_deobf_main.cpp   ← standalone CLI runner
 └── tests/
     └── deobf_input.ll        ← test IR fixture (obfuscated input)
@@ -32,8 +32,8 @@ learn-deobf/
 
 | Target | Output | Use |
 |---|---|---|
-| `learn_llvm_deobf_plugin` | `build/lib/learn_llvm_deobf.so` | Load via `opt -load-pass-plugin` |
-| `deobf_pass_lib` | `build/lib/libdeobf_pass_lib.so` | Shared lib for programmatic use |
+| `learn_llvm_deobf_plugin` | `build/lib/learn_llvm_deobf.{so,dylib}` | Load via `opt -load-pass-plugin` |
+| `deobf_pass_lib` | `build/lib/libdeobf_pass_lib.{so,dylib}` | Shared lib for programmatic use |
 | `pass_deobf` | `build/bin/pass_deobf` | CLI runner |
 
 ---
@@ -42,7 +42,8 @@ learn-deobf/
 
 ```bash
 # Deobfuscate an IR file:
-opt -load-pass-plugin ./build/lib/learn_llvm_deobf.so \
+PLUGIN_EXT=so   # macOS: dylib
+opt -load-pass-plugin ./build/lib/learn_llvm_deobf.${PLUGIN_EXT} \
     -passes=de-hello \
     -S ./learn-deobf/tests/deobf_input.ll \
     -o /tmp/restored.ll

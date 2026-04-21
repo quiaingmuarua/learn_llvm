@@ -49,7 +49,7 @@ learn-pass/
     │   ├── JunkPass.cpp
     │   ├── SimpleObfPass.cpp
     │   ├── FlattenCFPass.cpp
-    │   └── PassPlugin.cpp      ← plugin entry for learn_llvm_pass.so
+    │   └── PassPlugin.cpp      ← plugin entry for learn_llvm_pass shared module
     └── Kotoamatsukami/
         ├── PassPlugin.cpp      ← plugin entry; lists ALL pass names ← READ THIS
         ├── pass/               ← one .cpp per obfuscation pass
@@ -80,9 +80,9 @@ learn-pass/
 
 | Target | Output | Use |
 |---|---|---|
-| `Kotoamatsukami` | `build/lib/Kotoamatsukami.so` | Load via `-fpass-plugin=` or `opt -load-pass-plugin` |
-| `hello_pass_lib` | `build/lib/libhello_pass_lib.a` | Linked by tests |
-| `learn_llvm_pass` | `build/lib/learn_llvm_pass.so` | Simple pass plugin |
+| `Kotoamatsukami` | `build/lib/Kotoamatsukami.{so,dylib}` | Load via `-fpass-plugin=` or `opt -load-pass-plugin` |
+| `hello_pass_lib` | `build/lib/libhello_pass_lib.{so,dylib}` | Shared helper lib linked by tests and CLI tools |
+| `learn_llvm_pass` | `build/lib/learn_llvm_pass.{so,dylib}` | Simple pass plugin |
 | `pass_hello` | `build/bin/pass_hello` | CLI runner for hello passes |
 
 ---
