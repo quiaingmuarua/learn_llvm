@@ -13,7 +13,45 @@ obfuscation plugin → deobfuscation analysis.
 
 ---
 
-## 2. Repository Map
+## 2. Agent Fast Start
+
+If you are a new agent or a fresh sub-agent, do this in order:
+
+1. Read this file once.
+2. Read the module-local guide for the area you will touch:
+   - `learn-demo/AGENTS.md`
+   - `learn-lang/AGENTS.md`
+   - `learn-pass/AGENTS.md`
+   - `learn-deobf/AGENTS.md`
+3. Run `./build.sh test` before or after changes unless the task is doc-only.
+4. If the task touches pass registration, config, or plugin loading, also inspect:
+   - `learn-pass/src/Kotoamatsukami/PassPlugin.cpp`
+   - `Kotoamatsukami.config`
+   - `Kotoamatsukami.config.schema.json`
+
+### Task Router
+
+| If the task is about... | Read this first | Usually edit here |
+|---|---|---|
+| LLVM API experiments / numbered exercises | `learn-demo/AGENTS.md` | `learn-demo/src/`, `learn-demo/llvm_practice/` |
+| Lexer / Parser / toy language REPL | `learn-lang/AGENTS.md` | `learn-lang/include/`, `learn-lang/src/repl/` |
+| New pass / pass plugin / obfuscation config | `learn-pass/AGENTS.md` | `learn-pass/include/`, `learn-pass/src/`, root config files |
+| Deobfuscation / IR recovery | `learn-deobf/AGENTS.md` | `learn-deobf/include/`, `learn-deobf/src/` |
+| Test failures / behavior checks | this file + owning module guide | `tests/`, module sources it exercises |
+
+### Five-Minute Onboarding
+
+- Confirm LLVM version first: `llvm-config --version`
+- Prefer repo helper build: `./build.sh` or `./build.sh test`
+- The repo is centered on LLVM 17; 14–17 are tested, 22+ is not a target
+- New passes are not complete until registration, config wiring, and tests are updated together
+- Most cross-module regressions show up in root `tests/`, not inside the module directory
+
+For handoff-friendly context, see `docs/AGENT_QUICKSTART.md`.
+
+---
+
+## 3. Repository Map
 
 ```
 learn_llvm/
@@ -59,7 +97,7 @@ learn_llvm/
 
 ---
 
-## 3. Build
+## 4. Build
 
 ### Requirements
 
@@ -79,7 +117,10 @@ learn_llvm/
 ```
 
 `build.sh` auto-detects installed LLVM. On macOS it prefers Homebrew `llvm@17`
-and falls back to other installed versions only if needed.
+and falls back to other installed versions only if needed. On Linux/WSL it also
+checks common distro layouts such as `/usr/lib/llvm-17/bin/llvm-config` and
+keeps GNU compilers preferred by default. Explicit `LLVM_CONFIG`, `LLVM_DIR`,
+`CC`, and `CXX` overrides are respected.
 
 ### Manual build
 
@@ -140,7 +181,7 @@ cd build && ctest --output-on-failure
 
 ---
 
-## 4. Kotoamatsukami Pass Reference
+## 5. Kotoamatsukami Pass Reference
 
 All pass implementations are in `learn-pass/src/Kotoamatsukami/pass/`.
 
@@ -194,7 +235,7 @@ See `Kotoamatsukami.config.schema.json` for full schema.
 
 ---
 
-## 5. Architecture
+## 6. Architecture
 
 ```
 C/C++ source
@@ -218,7 +259,7 @@ LLVM IR ◄───────────────────────
 
 ---
 
-## 6. Adding New Code — Exact Steps
+## 7. Adding New Code — Exact Steps
 
 ### New demo (learn-demo)
 1. Create `learn-demo/src/demo_myname.cpp` — CMake auto-discovers it.
@@ -241,7 +282,7 @@ LLVM IR ◄───────────────────────
 
 ---
 
-## 7. Common Recipes
+## 8. Common Recipes
 
 ### List which passes are currently enabled
 
@@ -274,7 +315,7 @@ opt -dot-cfg /tmp/test_flat.ll -o /dev/null && xdot .rc4_init.dot
 
 ---
 
-## 8. Known Issues
+## 9. Known Issues
 
 | Issue | Cause | Fix |
 |---|---|---|
@@ -286,7 +327,7 @@ opt -dot-cfg /tmp/test_flat.ll -o /dev/null && xdot .rc4_init.dot
 
 ---
 
-## 9. Code Conventions
+## 10. Code Conventions
 
 | Convention | Rule |
 |---|---|
@@ -299,7 +340,7 @@ opt -dot-cfg /tmp/test_flat.ll -o /dev/null && xdot .rc4_init.dot
 
 ---
 
-## 10. CI
+## 11. CI
 
 `.github/workflows/ci.yml` — triggers on push/PR to `main`:
 - OS: `ubuntu-22.04`, LLVM version: env var `LLVM_VERSION` (currently `17`)

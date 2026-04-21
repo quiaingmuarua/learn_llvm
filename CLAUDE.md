@@ -79,7 +79,10 @@ learn_llvm/
 ```
 
 `build.sh` auto-detects installed LLVM. On macOS it prefers Homebrew `llvm@17`
-and falls back to other installed versions only if needed.
+and falls back to other installed versions only if needed. On Linux/WSL it also
+checks common distro layouts such as `/usr/lib/llvm-17/bin/llvm-config` and
+keeps GNU compilers preferred by default. Explicit `LLVM_CONFIG`, `LLVM_DIR`,
+`CC`, and `CXX` overrides are respected.
 
 ### Manual build
 

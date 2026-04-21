@@ -107,6 +107,9 @@ Homebrew 的 `llvm@17`，不要直接装最新 `llvm`，否则很容易拿到 LL
 ```
 
 `build.sh` 会自动探测 LLVM，并在 macOS 上优先选择 Homebrew `llvm@17`。
+在 Linux / WSL 上会优先尝试系统包常见布局，例如
+`/usr/lib/llvm-17/bin/llvm-config`，并保留 GNU 工具链优先级。
+如果你需要显式覆盖，直接设置 `LLVM_CONFIG`、`LLVM_DIR`、`CC`、`CXX` 即可。
 
 ## 手动构建
 
@@ -120,6 +123,21 @@ cmake -S . -B build \
   -G Ninja
 cmake --build build
 ```
+
+## CLion
+
+推荐直接使用仓库根目录的 `CMakePresets.json`。
+
+在 CLion 里：
+
+1. 打开 `Settings > Build, Execution, Deployment > CMake`
+2. 新建或选择一个 Profile
+3. 将 `Load CMake Presets` 打开，或直接选择 preset
+4. Apple Silicon 机器选择 `macos-homebrew-llvm17-arm64`
+5. Intel Mac 选择 `macos-homebrew-llvm17-intel`
+
+如果你已经手动在 CLion 里填过错误的 `LLVM_DIR`，先执行一次
+`Tools > CMake > Reset Cache and Reload Project`。
 
 ### macOS 推荐准备步骤
 

@@ -8,6 +8,38 @@ Implements LLVM passes that **reverse** the obfuscations applied by the
 Kotoamatsukami plugin. Currently early-stage; only `DeHelloPass` (recovering
 `SimpleObfPass` transformations) is implemented.
 
+## When To Enter This Module
+
+Use `learn-deobf` when the task is about:
+
+- restoring simpler IR from obfuscated IR
+- matching patterns emitted by `learn-pass`
+- the standalone deobf runner or plugin entry
+
+If you are changing the obfuscation side and the deobfuscation tests break,
+read this module guide after you finish the pass-side change.
+
+## Read First
+
+- `learn-deobf/CMakeLists.txt`
+- `learn-deobf/src/de_hello/DeHelloPass.cpp`
+- `learn-deobf/src/de_hello/PassPlugin.cpp`
+- `learn-deobf/tests/deobf_input.ll`
+
+## Common Edit Paths
+
+| Goal | Files |
+|---|---|
+| Add a new deobf pass | `include/learn_llvm/de_*`, `src/de_*/` |
+| Register pass name | `src/de_*/PassPlugin.cpp` |
+| Update fixture IR | `learn-deobf/tests/` |
+| Adjust CLI runner | `src/de_hello/pass_deobf_main.cpp` |
+
+## Verify
+
+- Preferred: `./build.sh test`
+- Narrow check: `ctest -R deobf --output-on-failure`
+
 ---
 
 ## Directory Layout

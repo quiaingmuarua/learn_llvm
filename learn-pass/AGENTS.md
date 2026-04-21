@@ -11,6 +11,44 @@ This module contains two LLVM pass libraries:
 2. **`Kotoamatsukami`** — production-grade obfuscation plugin with 13 passes,
    loadable as a shared library via `-fpass-plugin=`
 
+## When To Enter This Module
+
+Use `learn-pass` when the task is about:
+
+- adding or fixing an LLVM pass
+- pass plugin registration
+- Kotoamatsukami obfuscation behavior
+- root config wiring for enabled / disabled passes
+- tests that assert transformed IR shape
+
+This is the highest-coupling module in the repo. Many tasks here require edits
+in both code and config.
+
+## Read First
+
+- `learn-pass/CMakeLists.txt`
+- `learn-pass/src/Kotoamatsukami/PassPlugin.cpp`
+- `Kotoamatsukami.config`
+- `Kotoamatsukami.config.schema.json`
+- the failing test under root `tests/`
+
+## Common Edit Paths
+
+| Goal | Files |
+|---|---|
+| Add simple learning pass | `include/learn_llvm/hello/`, `src/hello/` |
+| Add Koto pass | `include/learn_llvm/Kotoamatsukami/`, `src/Kotoamatsukami/pass/` |
+| Register pass name | `src/Kotoamatsukami/PassPlugin.cpp` or `src/hello/PassPlugin.cpp` |
+| Change config semantics | `Kotoamatsukami.config`, schema, `utils/config.cpp` |
+| Fix IR helper behavior | `src/Kotoamatsukami/utils/` |
+
+## Verify
+
+- Preferred: `./build.sh test`
+- Fast checks:
+  `ctest -R 'pass_hello|JunkPass|SimpleObf|FlattenCF|Koto' --output-on-failure`
+- If plugin-loading behavior changes, also run `./build.sh opt`
+
 ---
 
 ## Directory Layout

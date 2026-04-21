@@ -1,0 +1,80 @@
+{
+  "version": 4,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 17,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-${presetName}",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "LEARN_LLVM_ENABLE_ONE_BACKEND": "OFF"
+      }
+    },
+    {
+      "name": "macos-homebrew-llvm17-arm64",
+      "displayName": "macOS Homebrew LLVM 17 (Apple Silicon)",
+      "description": "Use Homebrew llvm@17 from /opt/homebrew for CLion and local development.",
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "cacheVariables": {
+        "LLVM_DIR": "/opt/homebrew/opt/llvm@17/lib/cmake/llvm",
+        "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm@17/bin/clang",
+        "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm@17/bin/clang++"
+      }
+    },
+    {
+      "name": "macos-homebrew-llvm17-intel",
+      "displayName": "macOS Homebrew LLVM 17 (Intel)",
+      "description": "Use Homebrew llvm@17 from /usr/local for CLion and local development.",
+      "inherits": "base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      },
+      "cacheVariables": {
+        "LLVM_DIR": "/usr/local/opt/llvm@17/lib/cmake/llvm",
+        "CMAKE_C_COMPILER": "/usr/local/opt/llvm@17/bin/clang",
+        "CMAKE_CXX_COMPILER": "/usr/local/opt/llvm@17/bin/clang++"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "macos-homebrew-llvm17-arm64",
+      "configurePreset": "macos-homebrew-llvm17-arm64"
+    },
+    {
+      "name": "macos-homebrew-llvm17-intel",
+      "configurePreset": "macos-homebrew-llvm17-intel"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "macos-homebrew-llvm17-arm64",
+      "configurePreset": "macos-homebrew-llvm17-arm64",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "macos-homebrew-llvm17-intel",
+      "configurePreset": "macos-homebrew-llvm17-intel",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ]
+}

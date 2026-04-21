@@ -8,6 +8,39 @@ Implements a Kaleidoscope-style toy language compiler as a practical way to lear
 LLVM's frontend APIs: lexing, parsing, AST construction, IR generation via
 `IRBuilder`, and JIT execution via ORC JIT.
 
+## When To Enter This Module
+
+Use `learn-lang` when the task is about:
+
+- lexer or parser behavior
+- AST node shape or syntax support
+- the REPL entry point
+- future IR generation for the toy language
+
+If the task is about LLVM pass plugins or Kotoamatsukami, this is the wrong
+module.
+
+## Read First
+
+- `learn-lang/CMakeLists.txt`
+- `learn-lang/src/repl/Lexer.cpp`
+- `learn-lang/src/repl/Parser.cpp`
+- the related test in root `tests/`
+
+## Common Edit Paths
+
+| Goal | Files |
+|---|---|
+| Add token / lexer rule | `include/**/Lexer*.h`, `src/repl/Lexer.cpp` |
+| Add grammar / parser rule | `include/**/Parser*.h`, `src/repl/Parser.cpp` |
+| Add AST node | `include/`, `src/repl/AST.cpp` |
+| Adjust REPL wiring | `src/repl/lang_repl_main.cpp` |
+
+## Verify
+
+- Preferred: `./build.sh test`
+- Narrow check: `ctest -R 'LangParser|Lexer' --output-on-failure`
+
 ---
 
 ## Directory Layout

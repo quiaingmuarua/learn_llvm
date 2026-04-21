@@ -8,6 +8,36 @@ A sandbox for experimenting with LLVM APIs. Each `.cpp` file in `src/` is an
 independent program. The `llvm_practice/` subdirectory contains numbered
 step-by-step exercises building from hello-world to a custom backend.
 
+## When To Enter This Module
+
+Use `learn-demo` when the task is about:
+
+- a standalone LLVM API experiment
+- one of the numbered `llvm_practice` exercises
+- IRBuilder examples that are not part of the toy language or pass plugins
+
+If the task mentions pass plugins, obfuscation, or deobfuscation, you probably
+want `learn-pass` or `learn-deobf` instead.
+
+## Read First
+
+- `learn-demo/CMakeLists.txt`
+- the nearest exercise-local `CMakeLists.txt` if you are inside `llvm_practice`
+- the target source file you are changing
+
+## Common Edit Paths
+
+| Goal | Files |
+|---|---|
+| Add a new standalone demo | `learn-demo/src/*.cpp` |
+| Fix one exercise | `learn-demo/llvm_practice/<exercise>/` |
+| Fix test data or exercise unit tests | `learn-demo/llvm_practice/**/unittest/`, `testset/` |
+
+## Verify
+
+- Full repo-safe check: `./build.sh test`
+- Fast local check: build and run the specific exercise binary under `build/bin/`
+
 ---
 
 ## Directory Layout
