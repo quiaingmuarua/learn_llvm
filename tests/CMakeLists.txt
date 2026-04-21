@@ -79,7 +79,9 @@ if(LLVM_OPT_EXE)
             -o -
     )
     set_tests_properties(plugin_hello_opt_smoke
-            PROPERTIES PASS_REGULAR_EXPRESSION "hello-pass"
+            PROPERTIES
+            PASS_REGULAR_EXPRESSION "hello-pass"
+            LABELS "plugin_host"
     )
 
     add_test(
@@ -91,7 +93,9 @@ if(LLVM_OPT_EXE)
             -o -
     )
     set_tests_properties(plugin_deobf_opt_smoke
-            PROPERTIES PASS_REGULAR_EXPRESSION "add i32 %a, %b"
+            PROPERTIES
+            PASS_REGULAR_EXPRESSION "add i32 %a, %b"
+            LABELS "plugin_host"
     )
 else()
     message(WARNING "LLVM opt not found; plugin opt smoke tests are disabled")
@@ -107,6 +111,9 @@ if(LLVM_CLANG_EXE)
             -DOUTPUT_FILE=${CMAKE_BINARY_DIR}/bin/koto_plugin_smoke
             -DWORKING_DIR=${CMAKE_SOURCE_DIR}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_koto_plugin_smoke.cmake
+    )
+    set_tests_properties(plugin_koto_clang_smoke
+            PROPERTIES LABELS "plugin_host"
     )
 else()
     message(WARNING "LLVM clang not found; Koto clang smoke test is disabled")
@@ -130,6 +137,9 @@ if(LLVM_OPT_EXE)
             -DEXPECT_TEXT=dispatchBB
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_koto_opt_smoke.cmake
     )
+    set_tests_properties(plugin_koto_opt_flatten_smoke
+            PROPERTIES LABELS "plugin_host"
+    )
 
     get_filename_component(KOTO_SUBSTITUTION_CONFIG_NAME
             "${CMAKE_CURRENT_SOURCE_DIR}/koto_substitution_smoke_config.json" NAME)
@@ -147,5 +157,8 @@ if(LLVM_OPT_EXE)
             -DEXPECT_MODE=not_contains
             "-DEXPECT_TEXT=%sum = add i32 %a, %b"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_koto_opt_smoke.cmake
+    )
+    set_tests_properties(plugin_koto_opt_substitution_smoke
+            PROPERTIES LABELS "plugin_host"
     )
 endif()

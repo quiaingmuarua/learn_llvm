@@ -55,3 +55,57 @@ jobs:
           name: test-results
           path: build/Testing/
           retention-days: 7
+
+  build-and-test-sanitized:
+    runs-on: ubuntu-22.04
+
+    env:
+      ASAN_OPTIONS: detect_leaks=1:strict_init_order=1:check_initialization_order=true
+      UBSAN_OPTIONS: print_stacktrace=1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            wget \
+            gpg \
+            lsb-release \
+            software-properties-common \
+            ninja-build \
+            libstdc++-11-dev
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${LLVM_VERSION}
+          sudo apt-get install -y llvm-${LLVM_VERSION}-dev
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-sanitized \
+            -DLLVM_DIR=$(llvm-config-${LLVM_VERSION} --cmakedir) \
+            -DCMAKE_C_COMPILER=clang-${LLVM_VERSION} \
+            -DCMAKE_CXX_COMPILER=clang++-${LLVM_VERSION} \
+            -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
+            -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined" \
+            -DLEARN_LLVM_ENABLE_ONE_BACKEND=OFF \
+            -G Ninja
+
+      - name: Build
+        run: cmake --build build-sanitized --parallel $(nproc)
+
+      - name: Run tests
+        working-directory: build-sanitized
+        run: ctest --output-on-failure --parallel $(nproc) -E '^plugin_'
+
+      - name: Upload sanitized test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-sanitized
+          path: build-sanitized/Testing/
+          retention-days: 7

@@ -61,6 +61,21 @@ if(NOT CMAKE_CROSSCOMPILING)
     set_target_properties(learn_llvm_pass_plugin PROPERTIES
             OUTPUT_NAME "learn_llvm_pass"
     )
+
+    add_llvm_pass_plugin(learn_llvm_hello_only_plugin
+            src/hello/HelloPass.cpp
+            src/hello/HelloOnlyPassPlugin.cpp
+    )
+
+    target_include_directories(learn_llvm_hello_only_plugin PRIVATE
+            ${LEARN_PASS_INCLUDE_DIR}
+            ${LLVM_INCLUDE_DIRS}
+    )
+    target_compile_definitions(learn_llvm_hello_only_plugin PRIVATE ${LLVM_DEFINITIONS})
+
+    set_target_properties(learn_llvm_hello_only_plugin PROPERTIES
+            OUTPUT_NAME "learn_llvm_hello_only"
+    )
 else()
     # ARM64 交叉编译：使用与 Kotoamatsukami 相同的方法
     add_library(learn_llvm_pass_plugin SHARED
@@ -77,6 +92,24 @@ else()
     
     set_target_properties(learn_llvm_pass_plugin PROPERTIES
             OUTPUT_NAME "learn_llvm_pass"
+            POSITION_INDEPENDENT_CODE ON
+            LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all -Wl,--allow-shlib-undefined"
+    )
+
+    add_library(learn_llvm_hello_only_plugin SHARED
+            src/hello/HelloPass.cpp
+            src/hello/HelloOnlyPassPlugin.cpp
+    )
+
+    target_include_directories(learn_llvm_hello_only_plugin
+            PRIVATE
+            ${LEARN_PASS_INCLUDE_DIR}
+            ${LLVM_INCLUDE_DIRS}
+    )
+    target_compile_definitions(learn_llvm_hello_only_plugin PRIVATE ${LLVM_DEFINITIONS})
+
+    set_target_properties(learn_llvm_hello_only_plugin PROPERTIES
+            OUTPUT_NAME "learn_llvm_hello_only"
             POSITION_INDEPENDENT_CODE ON
             LINK_FLAGS "-Wl,--unresolved-symbols=ignore-all -Wl,--allow-shlib-undefined"
     )
@@ -223,4 +256,3 @@ if(EXISTS ${PASS_TEST_INPUT})
 else()
     message(WARNING "Test input file not found: ${PASS_TEST_INPUT}")
 endif()
-

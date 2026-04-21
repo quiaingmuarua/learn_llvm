@@ -391,3 +391,5 @@ build_*/
 # build.sh 本身保留在仓库中供参考
 
 !/python_script/lib/libgeiri.so.nam
+/build-llvm17/
+/build-llvm17-notest/
