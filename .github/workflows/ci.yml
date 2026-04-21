@@ -10,6 +10,9 @@ env:
   LLVM_VERSION: "17"
 
 jobs:
+  # -------------------------------------------------------------------------
+  # Job 1: Standard build + tests
+  # -------------------------------------------------------------------------
   build-and-test:
     runs-on: ubuntu-22.04
 
@@ -48,6 +51,37 @@ jobs:
         working-directory: build
         run: ctest --output-on-failure --parallel $(nproc)
 
+      # Verify that obfuscation is semantics-preserving:
+      # compile example/test.c (RC4 round-trip) twice — plain and obfuscated —
+      # then assert both produce identical output.
+      - name: Obfuscation correctness check
+        run: |
+          OPT=/usr/lib/llvm-${LLVM_VERSION}/bin/opt
+          CLANG=clang-${LLVM_VERSION}
+          PLUGIN=$(pwd)/build/lib/Kotoamatsukami.so
+          PASSES="split-basic-block,bogus-control-flow,substitution,flatten,add-junk-code,indirect-call,indirect-branch"
+
+          # Build reference binary
+          $CLANG -O1 example/test.c -o /tmp/koto_ref
+
+          # Obfuscate: source → bitcode → opt+plugin → obfuscated bitcode → binary
+          $CLANG -O1 -emit-llvm -c example/test.c -o /tmp/koto.bc
+          $OPT -load-pass-plugin "$PLUGIN" -passes="$PASSES" /tmp/koto.bc -o /tmp/koto_obf.bc
+          $CLANG /tmp/koto_obf.bc -o /tmp/koto_obf
+
+          # Compare outputs — any divergence means a pass broke semantics
+          REF=$(/tmp/koto_ref)
+          OBF=$(/tmp/koto_obf)
+          if [ "$REF" != "$OBF" ]; then
+            echo "FAIL: obfuscated output differs from reference"
+            echo "--- reference ---"
+            echo "$REF"
+            echo "--- obfuscated ---"
+            echo "$OBF"
+            exit 1
+          fi
+          echo "PASS: obfuscated RC4 output matches reference"
+
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -56,6 +90,9 @@ jobs:
           path: build/Testing/
           retention-days: 7
 
+  # -------------------------------------------------------------------------
+  # Job 2: AddressSanitizer + UndefinedBehaviorSanitizer
+  # -------------------------------------------------------------------------
   build-and-test-sanitized:
     runs-on: ubuntu-22.04
 
@@ -108,4 +145,104 @@ jobs:
         with:
           name: test-results-sanitized
           path: build-sanitized/Testing/
+          retention-days: 7
+
+  # -------------------------------------------------------------------------
+  # Job 3: NDK obfuscation smoke test
+  #
+  # Verifies the two-step IR pipeline:
+  #   NDK clang → .bc → host opt + Kotoamatsukami → obf.bc → NDK clang → .so
+  #
+  # Why a separate job: requires Android NDK (large download) and does not
+  # overlap with LLVM unit tests above.
+  # -------------------------------------------------------------------------
+  ndk-obfuscation-smoke:
+    runs-on: ubuntu-22.04
+
+    env:
+      NDK_VERSION: "26.3.11579264"
+      ANDROID_API: "24"
+      ANDROID_ABI: "arm64-v8a"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Install LLVM 17 — needed for building the plugin AND for host `opt`
+      - name: Install LLVM 17
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            wget gpg lsb-release software-properties-common \
+            ninja-build libstdc++-11-dev
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${LLVM_VERSION}
+          sudo apt-get install -y llvm-${LLVM_VERSION}-dev
+
+      # Install Android NDK via sdkmanager
+      - name: Install Android NDK ${{ env.NDK_VERSION }}
+        run: |
+          CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          wget -q "$CMDLINE_TOOLS_URL" -O /tmp/cmdline-tools.zip
+          unzip -q /tmp/cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
+            --sdk_root=$HOME/android-sdk \
+            "ndk;${NDK_VERSION}" 2>/dev/null | tail -1
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$HOME/android-sdk/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+
+      # Build Kotoamatsukami.so from the main project (host build)
+      - name: Build Kotoamatsukami plugin
+        run: |
+          cmake -S . -B build \
+            -DLLVM_DIR=$(llvm-config-${LLVM_VERSION} --cmakedir) \
+            -DCMAKE_C_COMPILER=clang-${LLVM_VERSION} \
+            -DCMAKE_CXX_COMPILER=clang++-${LLVM_VERSION} \
+            -DBUILD_TESTING=OFF \
+            -DLEARN_LLVM_ENABLE_ONE_BACKEND=OFF \
+            -G Ninja
+          cmake --build build --target Kotoamatsukami --parallel $(nproc)
+          echo "KOTO_PLUGIN=$(pwd)/build/lib/Kotoamatsukami.so" >> $GITHUB_ENV
+
+      # Build the NDK native library with obfuscation pipeline
+      - name: Build NDK native library (obfuscated)
+        run: |
+          cmake -S ndk_app/app/src/main/cpp \
+            -B build-ndk \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=${ANDROID_ABI} \
+            -DANDROID_PLATFORM=android-${ANDROID_API} \
+            -DANDROID_STL=c++_shared \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DKOTO_PLUGIN=$KOTO_PLUGIN \
+            -DLLVM17_PREFIX=/usr/lib/llvm-${LLVM_VERSION} \
+            -G Ninja
+          cmake --build build-ndk --parallel $(nproc)
+
+      # Verify the output .so: correct arch + JNI symbol exported
+      - name: Verify output .so
+        run: |
+          SO=build-ndk/libndk_example.so
+          echo "=== file ==="
+          file $SO
+          echo "=== exported JNI symbols ==="
+          llvm-nm-${LLVM_VERSION} -D $SO | grep "T Java_" | tee /tmp/jni_syms.txt
+          echo "=== IR inflation check ==="
+          ORIG=$(llvm-nm-${LLVM_VERSION} /tmp/*.bc 2>/dev/null | wc -l || echo 0)
+          # Fail if JNI symbol is missing
+          if ! grep -q "Java_" /tmp/jni_syms.txt; then
+            echo "ERROR: JNI export symbol missing from .so"
+            exit 1
+          fi
+          echo "Smoke test passed."
+
+      - name: Upload NDK build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ndk-build-artifacts
+          path: build-ndk/
           retention-days: 7

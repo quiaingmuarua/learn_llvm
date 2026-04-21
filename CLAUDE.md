@@ -47,6 +47,14 @@ learn_llvm/
 │   ├── include/
 │   └── src/de_hello/
 │
+├── ndk_app/                           ← Android NDK sample + obfuscation integration
+│   └── app/src/main/cpp/
+│       ├── CMakeLists.txt             ← two-step IR pipeline (see docs/ndk-obfuscation.md)
+│       └── native-lib.cpp             ← JNI entry point with XOR cipher
+│
+├── docs/
+│   └── ndk-obfuscation.md             ← NDK guide: why two-step, pass benchmarks, usage
+│
 └── tests/                             ← GoogleTest suites (link pass libs)
     ├── test_pass_hello.cpp
     ├── test_junk_pass.cpp
@@ -304,7 +312,25 @@ opt -dot-cfg /tmp/test_flat.ll -o /dev/null && xdot .rc4_init.dot
 
 ## 10. CI
 
-`.github/workflows/ci.yml` — triggers on push/PR to `main`:
-- OS: `ubuntu-22.04`, LLVM version: env var `LLVM_VERSION` (currently `17`)
-- `LEARN_LLVM_ENABLE_ONE_BACKEND=OFF`
-- Parallel build + test; uploads `Testing/` artifacts on failure
+`.github/workflows/ci.yml` — triggers on push/PR to `main`, three jobs:
+
+| Job | Runner | What it does |
+|-----|--------|-------------|
+| `build-and-test` | ubuntu-22.04 | Install LLVM 17, CMake configure, build, ctest |
+| `build-and-test-sanitized` | ubuntu-22.04 | Same + ASAN/UBSAN flags; skips plugin tests (`-E '^plugin_'`) |
+| `ndk-obfuscation-smoke` | ubuntu-22.04 | Install NDK 26, build Kotoamatsukami plugin, run two-step IR obfuscation, verify JNI symbol exported |
+
+Common env vars: `LLVM_VERSION=17`, `NDK_VERSION=26.3.11579264`.
+All jobs upload artifacts on failure (7-day retention).
+
+### NDK CI pipeline detail
+
+```
+Checkout → Install LLVM 17 → Install NDK 26 via sdkmanager
+→ cmake build (host) → Kotoamatsukami.so
+→ cmake build (NDK cross) ndk_app/app/src/main/cpp
+    step 1: NDK clang → .bc
+    step 2: opt + plugin → obf.bc
+    step 3: NDK clang → .o → libndk_example.so
+→ llvm-nm verify JNI symbol exported
+```
