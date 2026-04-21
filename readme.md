@@ -94,6 +94,45 @@ learn_llvm/
 
 ---
 
+## 4️⃣ ndk_app：Android NDK 混淆集成
+
+`ndk_app/` 是一个完整的 Android NDK 示例工程，演示如何将 Kotoamatsukami 混淆
+插件集成到 Android 原生库的构建流程中。
+
+### 为什么不能直接用 `-fpass-plugin`
+
+NDK 26 的 clang-17 是经 PGO+BOLT 优化的 Google 特供构建，与任何独立 LLVM 17
+（Homebrew / apt）存在内部 ABI 差异，直接加载插件会在 `PassBuilder` 注册回调
+时崩溃。
+
+### 解决方案：两步 IR 流水线
+
+```
+native-lib.cpp
+     │
+     ▼ NDK clang (aarch64-linux-android24)
+   .bc  ←── 保留完整的 Android ABI / sysroot 信息
+     │
+     ▼ host opt + Kotoamatsukami.{dylib,so}
+  obf.bc  ←── IR 层 pass，不依赖目标 ABI
+     │
+     ▼ NDK clang (aarch64-linux-android24)
+  libndk_example.so  ←── 最终 AArch64 Android 库
+```
+
+### 混淆强度（以 RC4 实现为基准）
+
+| Pass 组合 | 指令膨胀 |
+|-----------|---------|
+| `bogus-control-flow` | 4.4x |
+| `bcf + substitution` | 20.4x |
+| `sbb + bcf + sub + flatten` | 40.0x |
+| **全量（默认）** | **54.6x** |
+
+详见 [`docs/ndk-obfuscation.md`](docs/ndk-obfuscation.md)。
+
+---
+
 # 🛠️ 构建方式
 
 本仓库当前推荐使用 **LLVM 17**。Linux 上可以直接用系统包；macOS 上建议使用
@@ -268,14 +307,27 @@ learn-pass/src/pass_xxx.cpp
 
 # ✅ 持续集成
 
-GitHub Actions（`.github/workflows/ci.yml`）会在 `push` 与 `pull_request` 触发，流程如下：
+GitHub Actions（`.github/workflows/ci.yml`）会在 `push` 与 `pull_request` 触发，包含三个 job：
 
-1. 安装 Ninja、LLVM/Clang 17
-2. 运行 `cmake -S . -B build -DLLVM_DIR=$(llvm-config-17 --cmakedir) -G Ninja`
-3. `cmake --build build`
-4. `ctest --output-on-failure`
+| Job | 说明 |
+|-----|------|
+| `build-and-test` | 标准构建 + ctest |
+| `build-and-test-sanitized` | ASAN + UBSAN 构建 + ctest |
+| `ndk-obfuscation-smoke` | 安装 NDK 26、构建插件、跑两步 IR 混淆、验证 .so 导出 JNI 符号 |
 
-本地若想与 CI 对齐，可以直接执行以上命令。混淆相关的 gtest（`test_koto_*`）目前需要单独运行，上文“测试说明”部分给出了示例。
+本地若想与 CI 对齐：
+
+```bash
+# LLVM 构建与测试
+./build.sh test
+
+# NDK 混淆 smoke test（需要先 ./build.sh）
+cmake -S ndk_app/app/src/main/cpp -B /tmp/ndk-ci-test \
+  -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+  -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-24 -G Ninja
+cmake --build /tmp/ndk-ci-test
+llvm-nm -D /tmp/ndk-ci-test/libndk_example.so | grep “T Java_”
+```
 
 补充说明：当前仓库已经在 macOS + Homebrew `llvm@17` 环境下验证通过 `ctest`。
 
