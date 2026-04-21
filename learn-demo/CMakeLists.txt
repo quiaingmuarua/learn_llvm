@@ -19,7 +19,15 @@ add_subdirectory(llvm_practice/01-llvm-hellowold)
 add_subdirectory(llvm_practice/02-expr-compiler)
 add_subdirectory(llvm_practice/03-variable)
 add_subdirectory(llvm_practice/04-errhandle_unittest)
-add_subdirectory(llvm_practice/One_backend)
+
+# One_backend requires a full LLVM source tree (Target.td is not shipped in
+# installed LLVM packages). Disabled by default; enable only if you have the
+# LLVM source and have set LLVM_MAIN_SRC_DIR.
+option(LEARN_LLVM_ENABLE_ONE_BACKEND
+    "Build the custom One LLVM backend (requires LLVM source tree)" OFF)
+if(LEARN_LLVM_ENABLE_ONE_BACKEND)
+    add_subdirectory(llvm_practice/One_backend)
+endif()
 
 
 

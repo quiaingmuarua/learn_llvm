@@ -1,6 +1,7 @@
 #include "learn_llvm/de_hello/DeHelloPass.h"
 
 #include <llvm/ADT/SmallPtrSet.h>
+#include <llvm/Config/llvm-config.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
@@ -12,7 +13,12 @@ using namespace llvm;
 namespace {
 
 bool isObfAddHelperName(StringRef Name) {
+    // starts_with was renamed from startswith in LLVM 16
+#if LLVM_VERSION_MAJOR >= 16
     return Name.starts_with("__learn_llvm_obf_add_i");
+#else
+    return Name.startswith("__learn_llvm_obf_add_i");
+#endif
 }
 
 bool matchesObfAddSignature(const Function &Fn) {

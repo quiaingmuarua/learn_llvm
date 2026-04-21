@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "Kotoamatsukami.config.schema.json",
+  "title": "Kotoamatsukami Obfuscation Config",
+  "description": "Controls which Kotoamatsukami LLVM passes are active and how they behave when the plugin is loaded via -fpass-plugin=.",
+  "type": "object",
+  "properties": {
+    "target": {
+      "type": "string",
+      "description": "Target architecture hint (e.g. 'arm64', 'x86_64'). Used by some passes for arch-specific codegen.",
+      "examples": ["arm64", "x86_64"]
+    },
+    "loopen": {
+      "$ref": "#/$defs/passConfig",
+      "description": "Loop obfuscation. Injects a Kotoamatsukami_quick_pow helper function and rewrites loop structure.",
+      "properties": {
+        "model":             { "$ref": "#/$defs/model" },
+        "enable function":   { "$ref": "#/$defs/functionList" },
+        "disable function":  { "$ref": "#/$defs/functionList" },
+        "loopen_x_list":     { "type": "array", "items": { "type": "integer" }, "description": "Custom exponent list for quick_pow injection." },
+        "module_name":       { "type": "string", "description": "Optional module name filter." }
+      }
+    },
+    "forObs": {
+      "$ref": "#/$defs/passConfig",
+      "description": "For-loop obfuscation. Wraps loop bodies with extra iteration logic.",
+      "properties": {
+        "model":              { "$ref": "#/$defs/model" },
+        "enable function":    { "$ref": "#/$defs/functionList" },
+        "disable function":   { "$ref": "#/$defs/functionList" },
+        "innerLoopBoundary":  { "type": "integer", "minimum": 1, "description": "Max inner loop iterations added." },
+        "outerLoopBoundary":  { "type": "integer", "minimum": 1, "description": "Max outer loop iterations added." }
+      }
+    },
+    "splitBasicBlocks": {
+      "$ref": "#/$defs/passConfig",
+      "description": "Splits each basic block into N sub-blocks to increase CFG complexity.",
+      "properties": {
+        "model":            { "$ref": "#/$defs/model" },
+        "enable function":  { "$ref": "#/$defs/functionList" },
+        "disable function": { "$ref": "#/$defs/functionList" },
+        "split number":     { "type": "integer", "minimum": 2, "description": "Number of parts to split each basic block into." }
+      }
+    },
+    "branch2call":      { "$ref": "#/$defs/basicPassConfig", "description": "Converts direct branches to indirect calls (64-bit)." },
+    "branch2call_32":   { "$ref": "#/$defs/basicPassConfig", "description": "Converts direct branches to indirect calls (32-bit targets)." },
+    "junkCode":         { "$ref": "#/$defs/basicPassConfig", "description": "Injects dead arithmetic instructions that do not affect semantics." },
+    "antiDebug":        { "$ref": "#/$defs/basicPassConfig", "description": "Inserts ptrace-based anti-debugging checks." },
+    "indirectBranch":   { "$ref": "#/$defs/basicPassConfig", "description": "Replaces direct branch targets with computed indirect branches." },
+    "indirectCall":     { "$ref": "#/$defs/basicPassConfig", "description": "Replaces direct function calls with indirect dispatch through function pointers." },
+    "bogusControlFlow": { "$ref": "#/$defs/basicPassConfig", "description": "Inserts opaque predicates and fake branches that are never taken." },
+    "substitution":     { "$ref": "#/$defs/basicPassConfig", "description": "Replaces arithmetic/logical operations with semantically equivalent but harder to analyze forms." },
+    "flatten":          { "$ref": "#/$defs/basicPassConfig", "description": "Rewrites function CFG into a flat switch-dispatcher loop (OLLVM-style control flow flattening)." },
+    "gvEncrypt":        { "$ref": "#/$defs/basicPassConfig", "description": "Encrypts global string/variable constants and inserts runtime decryption stubs." }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "model": {
+      "type": "integer",
+      "enum": [0, 1],
+      "description": "0 = pass disabled, 1 = pass enabled"
+    },
+    "functionList": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of function names. [''] means apply to all functions."
+    },
+    "basicPassConfig": {
+      "type": "object",
+      "required": ["model"],
+      "properties": {
+        "model":            { "$ref": "#/$defs/model" },
+        "enable function":  { "$ref": "#/$defs/functionList" },
+        "disable function": { "$ref": "#/$defs/functionList" }
+      },
+      "additionalProperties": false
+    },
+    "passConfig": {
+      "type": "object",
+      "required": ["model"]
+    }
+  }
+}

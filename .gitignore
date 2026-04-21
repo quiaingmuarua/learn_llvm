@@ -363,4 +363,31 @@ core.*
 _deps/
 /Testing/Temporary/
 
+# ====================
+# 项目特定规则
+# ====================
+
+# 任意命名的构建目录（build_ci, build_release, build_debug 等）
+build_*/
+
+# 根目录下的 in-source build 产物
+/CMakeFiles/
+/Makefile
+/CTestTestfile.cmake
+/DartConfiguration.tcl
+/cmake_install.cmake
+
+# 构建后的二进制产物目录（不应提交预编译 binary）
+/bin/
+/lib/
+
+# opt/clang 手动输出的临时文件
+/tmp/
+
+# Kotoamatsukami 运行时测试配置（由 gtest 生成在 /tmp，保留条目作提示）
+# /tmp/koto_test_config_*.json  # 已在 /tmp/ 规则下覆盖
+
+# build.sh 中依赖的本地路径脚本，不纳入 CI
+# build.sh 本身保留在仓库中供参考
+
 !/python_script/lib/libgeiri.so.nam

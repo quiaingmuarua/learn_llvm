@@ -6,11 +6,13 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  LLVM_VERSION: "17"
+
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
-    env:
-      LLVM_VERSION: "17"
+    runs-on: ubuntu-22.04
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,7 +20,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build llvm-${LLVM_VERSION}-dev clang-${LLVM_VERSION} lld-${LLVM_VERSION}
+          sudo apt-get install -y \
+            ninja-build \
+            llvm-${LLVM_VERSION}-dev \
+            clang-${LLVM_VERSION} \
+            lld-${LLVM_VERSION} \
+            libstdc++-11-dev
 
       - name: Configure CMake
         run: |
@@ -26,12 +33,20 @@ jobs:
             -DLLVM_DIR=$(llvm-config-${LLVM_VERSION} --cmakedir) \
             -DCMAKE_C_COMPILER=clang-${LLVM_VERSION} \
             -DCMAKE_CXX_COMPILER=clang++-${LLVM_VERSION} \
+            -DLEARN_LLVM_ENABLE_ONE_BACKEND=OFF \
             -G Ninja
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --parallel $(nproc)
 
       - name: Run tests
         working-directory: build
-        run: ctest --output-on-failure
+        run: ctest --output-on-failure --parallel $(nproc)
 
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/Testing/
+          retention-days: 7
