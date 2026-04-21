@@ -47,7 +47,7 @@ If you are a new agent or a fresh sub-agent, do this in order:
 - New passes are not complete until registration, config wiring, and tests are updated together
 - Most cross-module regressions show up in root `tests/`, not inside the module directory
 
-For handoff-friendly context, see `docs/AGENT_QUICKSTART.md`.
+For fast onboarding and handoff, see `docs/AGENT_QUICKSTART.md`.
 
 ---
 

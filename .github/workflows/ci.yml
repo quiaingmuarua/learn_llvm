@@ -21,11 +21,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            wget \
+            gpg \
+            lsb-release \
+            software-properties-common \
             ninja-build \
-            llvm-${LLVM_VERSION}-dev \
-            clang-${LLVM_VERSION} \
-            lld-${LLVM_VERSION} \
             libstdc++-11-dev
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${LLVM_VERSION}
+          sudo apt-get install -y llvm-${LLVM_VERSION}-dev
 
       - name: Configure CMake
         run: |

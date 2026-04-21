@@ -1,49 +1,72 @@
 # AGENT_QUICKSTART.md — Fast Onboarding
 
-Use this file when a new agent needs to become productive in this repository
-without reading every module in full.
+Use this file when a new agent needs to become productive quickly.
 
-## 1. First 3 Steps
+## 1. Start
 
 1. Read root `AGENTS.md`
-2. Read exactly one module guide:
+2. Read one module guide only:
    - `learn-demo/AGENTS.md`
    - `learn-lang/AGENTS.md`
    - `learn-pass/AGENTS.md`
    - `learn-deobf/AGENTS.md`
-3. Verify the workspace with `./build.sh test`
+3. Run the smallest valid verification for your change
 
-## 2. Task Routing
+## 2. Route
 
-| Task shape | Main module | High-risk files |
-|---|---|---|
-| LLVM API demo or numbered practice exercise | `learn-demo` | per-exercise `CMakeLists.txt`, unit tests under `llvm_practice` |
-| Toy language syntax / parser / AST / REPL | `learn-lang` | `Lexer.*`, `Parser.*`, AST headers, parser tests |
-| New pass, plugin registration, pass config | `learn-pass` | `PassPlugin.cpp`, `Kotoamatsukami.config`, schema, root tests |
-| Recovering obfuscated IR | `learn-deobf` | `DeHelloPass.cpp`, plugin entry, deobf fixture IR |
+| Task | Module | Read first | Fast verify |
+|---|---|---|---|
+| LLVM API demo / numbered practice | `learn-demo` | local exercise dir + `learn-demo/AGENTS.md` | specific demo binary or `./build.sh test` |
+| Lexer / parser / AST / REPL | `learn-lang` | `Lexer.cpp`, `Parser.cpp`, `learn-lang/AGENTS.md` | `ctest -R 'LangParser|Lexer' --output-on-failure` |
+| New pass / plugin registration / config | `learn-pass` | `PassPlugin.cpp`, config files, `learn-pass/AGENTS.md` | `./build.sh test` |
+| Deobfuscation / IR recovery | `learn-deobf` | `DeHelloPass.cpp`, fixture IR, `learn-deobf/AGENTS.md` | `ctest -R deobf --output-on-failure` |
 
-## 3. Minimum Verification
+## 3. Baselines
 
 | Change type | Minimum check |
 |---|---|
-| Docs only | `bash -n build.sh` if script docs changed; otherwise no build needed |
+| Docs only | no build; if `build.sh` docs changed, run `bash -n build.sh` |
 | Build/config/script changes | `./build.sh test` |
-| `learn-lang` parser or lexer | `./build.sh test` or `ctest -R 'LangParser|Lexer' --output-on-failure` |
-| `learn-pass` / `learn-deobf` pass logic | `./build.sh test` |
+| Pass logic | `./build.sh test` |
 
-## 4. Common Pitfalls
+## 4. Pitfalls
 
-- The repository targets LLVM 17 first. Do not silently upgrade behavior for LLVM 22+ and call it a fix.
-- A new Kotoamatsukami pass is incomplete unless all of these move together:
-  header, implementation, `PassPlugin.cpp`, `CMakeLists.txt`, config JSON, config schema, tests.
-- Plugin outputs are platform-specific shared libraries: `.so` on Linux/WSL, `.dylib` on macOS.
-- `One_backend` is intentionally off by default. It requires the full LLVM source tree.
+- Target LLVM 17 first. Do not treat LLVM 22+ compatibility as the default path.
+- A Koto pass is not complete until code, registration, config, schema, and tests move together.
+- Plugin outputs are `.so` on Linux/WSL and `.dylib` on macOS.
+- `One_backend` stays off unless the full LLVM source tree is available.
 
-## 5. Handoff Format
+## 5. Handoff
 
-When handing off to another agent, include:
+Include:
 
-- the target module
-- the files already touched
-- the exact verification command you ran
-- any LLVM-version assumption you relied on
+- target module
+- touched files
+- exact verification command
+- LLVM-version assumption
+- immediate next step
+
+Template:
+
+```md
+# Handoff
+
+## Task
+- User asked:
+- Done:
+- Pending:
+
+## Scope
+- Module:
+- Files touched:
+- Files intentionally not touched:
+
+## State
+- Build/test status:
+- Known failing command:
+- LLVM assumption:
+
+## Next
+- Immediate next action:
+- Verification:
+```

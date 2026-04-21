@@ -1,0 +1,16 @@
+{
+  "target": "x86_64",
+  "loopen": { "model": 0, "enable function": [""], "disable function": [], "loopen_x_list": [], "module_name": "" },
+  "forObs": { "model": 0, "enable function": [""], "disable function": [], "innerLoopBoundary": 4, "outerLoopBoundary": 4 },
+  "splitBasicBlocks": { "model": 0, "enable function": [""], "disable function": [], "split number": 2 },
+  "branch2call": { "model": 0, "enable function": [""], "disable function": [] },
+  "branch2call_32": { "model": 0, "enable function": [""], "disable function": [] },
+  "junkCode": { "model": 0, "enable function": [""], "disable function": [], "probability": 20 },
+  "antiDebug": { "model": 0, "enable function": [""], "disable function": [] },
+  "indirectBranch": { "model": 0, "enable function": [""], "disable function": [] },
+  "indirectCall": { "model": 0, "enable function": [""], "disable function": [] },
+  "bogusControlFlow": { "model": 0, "enable function": [""], "disable function": [] },
+  "substitution": { "model": 0, "enable function": [""], "disable function": [] },
+  "flatten": { "model": 1, "enable function": [""], "disable function": [] },
+  "gvEncrypt": { "model": 0, "enable function": [""], "disable function": [] }
+}
