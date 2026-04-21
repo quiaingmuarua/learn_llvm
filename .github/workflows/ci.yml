@@ -128,7 +128,7 @@ jobs:
             -DCMAKE_C_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
             -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer" \
             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined" \
-            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined -shared-libasan -shared-libubsan" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined -shared-libasan" \
             -DLEARN_LLVM_ENABLE_ONE_BACKEND=OFF \
             -G Ninja
 
@@ -180,19 +180,19 @@ jobs:
           sudo ./llvm.sh ${LLVM_VERSION}
           sudo apt-get install -y llvm-${LLVM_VERSION}-dev
 
-      # Install Android NDK via sdkmanager
+      # Install Android NDK via the pre-installed SDK tools on GitHub-hosted runners.
+      # $ANDROID_SDK_ROOT is pre-set to /usr/local/lib/android/sdk on ubuntu-22.04.
       - name: Install Android NDK ${{ env.NDK_VERSION }}
         run: |
-          CMDLINE_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          wget -q "$CMDLINE_TOOLS_URL" -O /tmp/cmdline-tools.zip
-          unzip -q /tmp/cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
-          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager \
-            --sdk_root=$HOME/android-sdk \
-            "ndk;${NDK_VERSION}" 2>/dev/null | tail -1
-          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "ANDROID_NDK_ROOT=$HOME/android-sdk/ndk/${NDK_VERSION}" >> $GITHUB_ENV
+          echo "y" | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${NDK_VERSION}" 2>&1 | tail -3
+          NDK_PATH="${ANDROID_SDK_ROOT}/ndk/${NDK_VERSION}"
+          if [ ! -f "${NDK_PATH}/build/cmake/android.toolchain.cmake" ]; then
+            echo "ERROR: NDK toolchain not found at ${NDK_PATH}"
+            exit 1
+          fi
+          echo "ANDROID_NDK_ROOT=${NDK_PATH}" >> $GITHUB_ENV
+          echo "NDK installed: ${NDK_PATH}"
 
       # Build Kotoamatsukami.so from the main project (host build)
       - name: Build Kotoamatsukami plugin
